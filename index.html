@@ -249,6 +249,9 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 
+<!-- Supabase client (dipakai saat di-deploy di luar Claude, mis. Vercel) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <!-- ==================== LANDING ==================== -->
 <section id="landing">
   <div class="join-card">
@@ -361,7 +364,23 @@ const HEARTBEAT_MS = 9000;
 const POLL_MS = 2200;
 const OFFLINE_MS = 26000;
 
-const S = window.storage; // shared persistent store
+/* ============================================================
+   >>> KONFIG BACKEND — isi 2 baris ini saat deploy ke Vercel <<<
+   Ambil dari Supabase: Project Settings → API
+   (pakai "anon public" key, JANGAN service_role)
+   ============================================================ */
+const SUPABASE_URL = "https://rgqnbuplwcxrkjvhgmkf.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJncW5idXBsd2N4cmtqdmhnbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjA1ODAsImV4cCI6MjA5OTI5NjU4MH0.DIQclBZWbRqY5-Suas8HXcOtT0iV_ULrAaI-e0pCsG8";
+
+/* Auto-pilih backend: storage bawaan Claude kalau ada, kalau nggak → Supabase */
+const claudeStore = (typeof window !== 'undefined' && window.storage) ? window.storage : null;
+let sb = null;
+if (!claudeStore && window.supabase && /^https:\/\/.+\.supabase\.co/.test(SUPABASE_URL)) {
+  try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+  catch (e) { console.error('Supabase init gagal:', e); }
+}
+const storageReady = () => !!(claudeStore || sb);
+
 const state = {
   mode: 'create',          // landing tab
   joinRole: null,
@@ -378,20 +397,40 @@ const state = {
   myVoteVal: undefined,
 };
 
-/* ---------- storage helpers (defensive) ---------- */
+/* ---------- storage helpers (dual-backend, defensive) ----------
+   Kontrak: selalu terima/kembalikan OBJECT (bukan string).
+   - Claude: value disimpan sebagai string → stringify/parse.
+   - Supabase: kolom jsonb → object langsung. */
 async function sGet(key) {
-  try { const r = await S.get(key, true); return r ? JSON.parse(r.value) : null; }
-  catch (e) { return null; }
+  try {
+    if (claudeStore) { const r = await claudeStore.get(key, true); return r ? JSON.parse(r.value) : null; }
+    const { data, error } = await sb.from('pp_kv').select('value').eq('key', key).maybeSingle();
+    if (error) { console.error(error); return null; }
+    return data ? data.value : null;
+  } catch (e) { return null; }
 }
 async function sSet(key, val) {
-  try { await S.set(key, JSON.stringify(val), true); return true; }
-  catch (e) { console.error('set fail', key, e); return false; }
+  try {
+    if (claudeStore) { await claudeStore.set(key, JSON.stringify(val), true); return true; }
+    const { error } = await sb.from('pp_kv').upsert({ key, value: val, updated_at: new Date().toISOString() });
+    if (error) { console.error('set fail', key, error); return false; }
+    return true;
+  } catch (e) { console.error('set fail', key, e); return false; }
 }
 async function sList(prefix) {
-  try { const r = await S.list(prefix, true); return (r && r.keys) ? r.keys : []; }
-  catch (e) { return []; }
+  try {
+    if (claudeStore) { const r = await claudeStore.list(prefix, true); return (r && r.keys) ? r.keys : []; }
+    const { data, error } = await sb.from('pp_kv').select('key').like('key', prefix + '%');
+    if (error) { console.error(error); return []; }
+    return data.map(r => r.key);
+  } catch (e) { return []; }
 }
-async function sDel(key) { try { await S.delete(key, true); } catch (e) {} }
+async function sDel(key) {
+  try {
+    if (claudeStore) { await claudeStore.delete(key, true); return; }
+    await sb.from('pp_kv').delete().eq('key', key);
+  } catch (e) {}
+}
 
 /* ---------- key builders ---------- */
 const kMeta = (r) => `pp:room:${r}:meta`;
@@ -463,7 +502,7 @@ async function createRoom() {
   const roomName = document.getElementById('roomNameInput').value.trim();
   if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
   if (!roomName) return (landErr.textContent = 'Kasih nama room / sprint-nya.');
-  if (!S) return (landErr.textContent = 'Penyimpanan tidak tersedia di lingkungan ini.');
+  if (!storageReady()) return (landErr.textContent = 'Backend belum siap — isi SUPABASE_URL & SUPABASE_ANON_KEY di kode dulu.');
 
   const rid = roomCode();
   const me = { id: uid(), name, role: 'master' };
@@ -484,7 +523,7 @@ async function joinRoom() {
   if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
   if (!code) return (landErr.textContent = 'Masukkan kode room.');
   if (!state.joinRole) return (landErr.textContent = 'Pilih peran kamu (Developer / Tester).');
-  if (!S) return (landErr.textContent = 'Penyimpanan tidak tersedia di lingkungan ini.');
+  if (!storageReady()) return (landErr.textContent = 'Backend belum siap — isi SUPABASE_URL & SUPABASE_ANON_KEY di kode dulu.');
 
   const meta = await sGet(kMeta(code));
   if (!meta) return (landErr.textContent = 'Room tidak ditemukan. Cek lagi kodenya.');
