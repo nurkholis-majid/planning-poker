@@ -16,7 +16,7 @@
     --white:  #ffffff;
 
     --ink: var(--navy);
-    --paper: #eef3f8;
+    --paper: #e7eef6;
     --surface: var(--white);
     --muted: #5b6b84;
     --line: #dbe4ef;
@@ -32,8 +32,11 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; min-height: 100%; }
   body {
-    font-family: var(--body); color: var(--ink); background: var(--paper);
-    -webkit-font-smoothing: antialiased; line-height: 1.45;
+    font-family: var(--body); color: var(--ink); line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(80% 55% at 50% 0%, #dce7f3 0%, transparent 70%),
+      var(--paper);
   }
   button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
   input, select, textarea { font-family: inherit; font-size: 16px; } /* 16px: cegah zoom iOS */
@@ -103,7 +106,8 @@
   .code-chip button:hover { background: rgba(255,255,255,.16); }
   .spacer { flex: 1; }
   .me-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex: none; transition: background .2s; }
+  .dot.bad { background: #e05252; box-shadow: 0 0 0 3px rgba(224,82,82,.2); }
   .leave-btn {
     padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 600;
     color: var(--muted); border: 1.5px solid var(--line); background: var(--white);
@@ -116,16 +120,30 @@
   }
 
   /* ---- meja ---- */
+  /* FIX: dulu pakai linear-gradient dengan sintaks radial ("150% 120% at ...") →
+     deklarasi ditolak browser → meja jadi transparan/putih. Sekarang radial yang benar. */
   .table {
-    background: linear-gradient(150% 120% at 50% 0%, var(--blue) 0%, var(--navy) 68%);
-    border-radius: 18px; padding: 20px; color: var(--white);
-    box-shadow: inset 0 0 0 1px rgba(127,205,238,.18), var(--shadow); min-height: 300px;
+    background:
+      radial-gradient(120% 110% at 50% -10%, #1248916b 0%, transparent 60%),
+      radial-gradient(140% 120% at 50% 0%, var(--blue) 0%, var(--navy) 70%);
+    background-color: var(--navy);
+    border-radius: 18px; padding: 22px; color: var(--white);
+    box-shadow: inset 0 0 0 1px rgba(127,205,238,.2), 0 10px 30px rgba(14,15,59,.22);
+    min-height: 260px;
   }
   .story-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--sky); font-weight: 600; }
   .story-head h2 { font-family: var(--disp); font-size: 21px; margin: 4px 0 0; line-height: 1.25; word-break: break-word; }
   .story-head .desc { color: #c9def0; font-size: 14px; margin-top: 6px; white-space: pre-wrap; word-break: break-word; }
-  .table-empty { text-align: center; padding: 56px 10px; color: #b7d5ea; }
-  .table-empty .big { font-family: var(--disp); font-size: 17px; color: var(--white); margin-bottom: 6px; }
+  .table-empty { text-align: center; padding: 34px 10px 30px; color: #b7d5ea; }
+  .table-empty .big { font-family: var(--disp); font-size: 18px; color: var(--white); margin: 12px 0 6px; }
+  .table-empty .deck { display: flex; justify-content: center; gap: 8px; }
+  .table-empty .deck i {
+    width: 34px; height: 48px; border-radius: 7px; display: block;
+    background: repeating-linear-gradient(45deg, #1a1c52 0 5px, #23265f 5px 10px);
+    box-shadow: inset 0 0 0 2px rgba(127,205,238,.35);
+  }
+  .table-empty .deck i:nth-child(1) { transform: rotate(-8deg) translateY(3px); }
+  .table-empty .deck i:nth-child(3) { transform: rotate(8deg) translateY(3px); }
 
   /* ---- kartu yang dimainkan ---- */
   .played { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
@@ -149,7 +167,7 @@
   .waiting { color: #9dc2dd; font-size: 13px; align-self: center; }
 
   /* ---- hasil ---- */
-  .result { margin-top: 22px; background: rgba(0,0,0,.22); border-radius: 14px; padding: 16px; }
+  .result { margin-top: 22px; background: rgba(4,5,26,.42); border: 1px solid rgba(127,205,238,.16); border-radius: 14px; padding: 16px; }
   .res-grid { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
   .res-block { min-width: 132px; }
   .res-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--sky); font-weight: 600; }
@@ -225,6 +243,10 @@
   .edit-row { display: flex; gap: 6px; width: 100%; }
   .edit-row input { flex: 1; min-width: 0; padding: 7px 9px; border-radius: 8px; border: 1.5px solid var(--blue); outline: none; font-size: 13.5px; }
 
+  .export-menu { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; padding: 6px; background: var(--blue-soft); border-radius: 10px; }
+  .export-menu button { text-align: left; padding: 8px 10px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--ink); }
+  .export-menu button:hover { background: var(--white); }
+
   .total-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
   .total-row .tl { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
   .total-row .tv { font-family: var(--disp); font-weight: 700; font-size: 22px; color: var(--orange); }
@@ -292,8 +314,12 @@
   }
 </style>
 
-<!-- Supabase client (dipakai saat deploy di luar Claude, mis. Vercel) -->
+<!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Konfigurasi DB dipisah ke file sendiri.
+     File ini TIDAK PERNAH ditimpa saat kode di-update → tidak perlu tempel ulang key. -->
+<script src="config.js"></script>
 
 <!-- ===================== LANDING ===================== -->
 <section id="landing">
@@ -308,7 +334,7 @@
 
     <div class="field">
       <label for="nameInput">Nama kamu</label>
-      <input id="nameInput" type="text" placeholder="cth. Welly" maxlength="24" autocomplete="off" />
+      <input id="nameInput" type="text" placeholder="cth. Majid" maxlength="24" autocomplete="off" />
     </div>
 
     <div class="tabs">
@@ -361,6 +387,7 @@
     </span>
     <span class="spacer"></span>
     <span class="me-badge"><span class="dot"></span><span id="meText">—</span></span>
+    <button class="leave-btn hidden" id="closeBtn">Tutup room</button>
     <button class="leave-btn" id="leaveBtn">Keluar</button>
   </div>
 
@@ -369,7 +396,17 @@
 
     <div class="rail">
       <div class="panel">
-        <h3>Story <span class="count" id="storyCount"></span></h3>
+        <h3>Story
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="count" id="storyCount"></span>
+            <button class="icon-btn" id="exportBtn" title="Ekspor hasil">⤓</button>
+          </span>
+        </h3>
+        <div id="exportMenu" class="export-menu hidden">
+          <button data-exp="copy">📋 Salin ringkasan</button>
+          <button data-exp="csv">📄 Unduh CSV</button>
+          <button data-exp="md">📝 Salin tabel Markdown</button>
+        </div>
         <div id="addStoryWrap" class="add-story hidden">
           <input id="stTitle" type="text" placeholder="Judul story" maxlength="90" />
           <textarea id="stDesc" placeholder="Deskripsi (opsional)" maxlength="300"></textarea>
@@ -400,19 +437,13 @@
    ================================================================ */
 
 /* ============================================================
-   >>> KONFIG BACKEND — isi 2 baris ini saat deploy ke Vercel <<<
-
-   SUPABASE_URL : HANYA domain. Jangan sertakan "/rest/v1" dan jangan
-                  ada "/" di ujung — supabase-js menambahkan path-nya
-                  sendiri. Kalau dobel → error PGRST125.
-       BENAR  → https://abcdefgh.supabase.co
-       SALAH  → https://abcdefgh.supabase.co/rest/v1
-
-   SUPABASE_ANON_KEY : publishable key (sb_publishable_...) atau anon
-                  key legacy (eyJhbGci...). JANGAN service_role.
+   KONFIG BACKEND — dibaca dari config.js (window.PP_CONFIG).
+   Kode ini tidak lagi menyimpan URL/key, jadi file HTML aman ditimpa
+   kapan pun tanpa kehilangan konfigurasi.
    ============================================================ */
-const SUPABASE_URL = "https://rgqnbuplwcxrkjvhgmkf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJncW5idXBsd2N4cmtqdmhnbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjA1ODAsImV4cCI6MjA5OTI5NjU4MH0.DIQclBZWbRqY5-Suas8HXcOtT0iV_ULrAaI-e0pCsG8";
+const CFG = (typeof window !== 'undefined' && window.PP_CONFIG) ? window.PP_CONFIG : null;
+const SUPABASE_URL = CFG ? (CFG.url || '') : '';
+const SUPABASE_ANON_KEY = CFG ? (CFG.key || '') : '';
 
 /* Normalisasi URL supaya salah-tempel tidak bikin PGRST125 lagi. */
 function normalizeSupabaseUrl(u) {
@@ -428,7 +459,8 @@ let configError = '';
 if (!claudeStore) {
   const _url = normalizeSupabaseUrl(SUPABASE_URL);
   const _key = String(SUPABASE_ANON_KEY || '').trim();
-  if (!window.supabase) configError = 'Library Supabase gagal dimuat (cek koneksi/CDN).';
+  if (!CFG) configError = 'config.js tidak ditemukan / belum dibuat. Salin config.example.js → config.js lalu isi url & key.';
+  else if (!window.supabase) configError = 'Library Supabase gagal dimuat (cek koneksi/CDN).';
   else if (!/^https:\/\/[^/]+\.supabase\.co$/.test(_url)) configError = 'SUPABASE_URL tidak valid. Harus: https://<project-id>.supabase.co';
   else if (!_key || _key.startsWith('YOUR-')) configError = 'SUPABASE_ANON_KEY belum diisi.';
   else {
@@ -441,7 +473,7 @@ const storageReady = () => !!(claudeStore || sb);
 let lastStorageError = '';
 
 /* ---------- konstanta ---------- */
-const FIB = [0, 1, 2, 3, 5, 8, 13, 21, '?', '☕'];
+const FIB = [0, 1, 2, 3, 5, 8, '?'];   // sesuai permintaan: tanpa 13, 21, ☕
 const NUM_FIB = FIB.filter(v => typeof v === 'number');
 const POLL_MS = 2200;
 const HEARTBEAT_MS = 8000;
@@ -463,6 +495,8 @@ const state = {
   pollTick: 0,
   lastHeartbeat: 0,
   timer: null,
+  syncOk: true,        // false = sync terakhir gagal → data di layar mungkin basi
+  roomClosed: false,
 };
 
 /* FIX (bug 4 & story-point-0): override HANYA berisi nilai kalau Master
@@ -470,14 +504,31 @@ const state = {
    Dulu di-latch pada render pertama saat vote belum ke-fetch → nyangkut di 0. */
 const override = { dev: null, tester: null };
 
-/* ---------- storage helpers (dual backend) ---------- */
+/* ---------- storage helpers (dual backend) ----------
+   FIX BUG sList/sGet — KONTRAK PENTING:
+     undefined = GAGAL (jaringan/DB error) → JANGAN dianggap data kosong
+     null      = sukses, tapi datanya memang tidak ada
+     nilai/array = sukses
+   Dulu error dan "kosong" sama-sama balik []/null. Akibatnya satu hiccup
+   jaringan saat fase revealed terbaca sebagai "tidak ada satu pun vote",
+   poin jatuh ke 0, dan kalau Master pas klik "Kunci & lanjut" di detik itu,
+   story tersimpan 0 point secara permanen. */
 async function sGet(key) {
   try {
-    if (claudeStore) { const r = await claudeStore.get(key, true); return r ? JSON.parse(r.value) : null; }
+    if (claudeStore) {
+      // storage Claude melempar error kalau key tidak ada → tidak bisa
+      // dibedakan dari error asli; di mode preview ini kita terima.
+      try { const r = await claudeStore.get(key, true); return r ? JSON.parse(r.value) : null; }
+      catch (_) { return null; }
+    }
     const { data, error } = await sb.from('pp_kv').select('value').eq('key', key).maybeSingle();
-    if (error) { console.error(error); return null; }
+    if (error) { lastStorageError = error.message; console.error('[PP] sGet gagal', key, error); return undefined; }
     return data ? data.value : null;
-  } catch (e) { return null; }
+  } catch (e) {
+    lastStorageError = e.message || String(e);
+    console.error('[PP] sGet exception', key, e);
+    return undefined;
+  }
 }
 async function sSet(key, val) {
   try {
@@ -491,9 +542,13 @@ async function sList(prefix) {
   try {
     if (claudeStore) { const r = await claudeStore.list(prefix, true); return (r && r.keys) ? r.keys : []; }
     const { data, error } = await sb.from('pp_kv').select('key').like('key', prefix + '%');
-    if (error) { console.error(error); return []; }
+    if (error) { lastStorageError = error.message; console.error('[PP] sList gagal', prefix, error); return undefined; }
     return data.map(r => r.key);
-  } catch (e) { return []; }
+  } catch (e) {
+    lastStorageError = e.message || String(e);
+    console.error('[PP] sList exception', prefix, e);
+    return undefined;   // undefined ≠ [] — ini yang dulu bikin poin jatuh ke 0
+  }
 }
 async function sDel(key) {
   try {
@@ -524,6 +579,43 @@ function roomCode() {
 const esc = (s) => s == null ? '' : String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 const initials = (n) => (n || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
 const isOffline = (p) => now() - (p.lastSeen || 0) > OFFLINE_MS;
+
+/* ============================================================
+   SESSION — supaya refresh tab TIDAK bikin keluar room.
+   Identitas (id peserta) disimpan di localStorage. Saat halaman
+   dibuka lagi, kita masuk kembali sebagai orang yang SAMA — jadi
+   vote lama tetap miliknya, dan status Master tidak hilang.
+   Master dikenali dari meta.masterId di DB (bukan dari memori),
+   jadi statusnya tahan refresh, tutup tab, bahkan ganti browser
+   selama session masih tersimpan.
+
+   Catatan: localStorage tidak jalan di preview artifact Claude —
+   semua dibungkus try/catch, jadi di sana app tetap hidup, hanya
+   tanpa fitur pulih-otomatis.
+   ============================================================ */
+const LS_KEY = 'pp:session';
+const SESSION_TTL = 12 * 60 * 60 * 1000;   // 12 jam
+
+function saveSession() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      roomId: state.roomId, id: state.me.id, name: state.me.name,
+      role: state.me.role, joinedAt: (state.people[state.me.id] || {}).joinedAt || now(),
+      savedAt: now(),
+    }));
+  } catch (e) { /* mode privat / storage diblokir → abaikan */ }
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || !s.roomId || !s.id) return null;
+    if (now() - (s.savedAt || 0) > SESSION_TTL) return null;   // kedaluwarsa
+    return s;
+  } catch (e) { return null; }
+}
+function clearSession() { try { localStorage.removeItem(LS_KEY); } catch (e) {} }
 
 let toastTimer;
 function toast(msg) {
@@ -621,6 +713,13 @@ nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') state.mode =
 document.getElementById('roomNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') createRoom(); });
 document.getElementById('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
 
+/* Saat halaman dimuat: kalau ada session valid → langsung masuk lagi.
+   Ini yang bikin refresh tab tidak lagi menendang Master keluar. */
+(async function boot() {
+  if (configError) { landErr.textContent = configError; return; }
+  try { await restoreSession(); } catch (e) { console.error('[PP] restore gagal', e); }
+})();
+
 /* ================================================================
    MASUK / KELUAR ROOM
    ================================================================ */
@@ -633,9 +732,37 @@ function enterRoom(rid, me, isMaster, meta) {
   document.getElementById('meText').textContent =
     me.name + ' · ' + (isMaster ? 'Room Master' : me.role === 'developer' ? 'Developer' : 'Tester / QA');
   document.getElementById('addStoryWrap').classList.toggle('hidden', !isMaster);
+  document.getElementById('closeBtn').classList.toggle('hidden', !isMaster);
 
+  saveSession();
   syncAll().then(render);
   state.timer = setInterval(tick, POLL_MS);
+}
+
+/* Dipanggil saat halaman dimuat: kalau ada session valid, langsung masuk
+   kembali ke room tanpa isi form lagi. */
+async function restoreSession() {
+  if (!storageReady()) return false;
+  const sess = loadSession();
+  if (!sess) return false;
+
+  const meta = await sGet(kMeta(sess.roomId));
+  if (meta === undefined) return false;          // error jaringan → jangan hapus session
+  if (meta === null) { clearSession(); return false; }  // room sudah ditutup
+
+  const me = { id: sess.id, name: sess.name, role: sess.role };
+
+  /* Tulis ulang key peserta: kalau tab lama sempat dianggap keluar,
+     kita muncul lagi dengan ID yang sama (vote lama tetap terhitung miliknya). */
+  await sSet(kPart(sess.roomId, me.id), {
+    ...me, joinedAt: sess.joinedAt || now(), lastSeen: now(),
+  });
+
+  /* Master ditentukan dari DB, bukan dari flag lokal → tahan refresh. */
+  const isMaster = meta.masterId === me.id;
+  enterRoom(sess.roomId, me, isMaster, meta);
+  toast('Masuk lagi sebagai ' + me.name);
+  return true;
 }
 
 /* FITUR 1: keluar room. Hapus key peserta + vote-nya di story aktif,
@@ -651,9 +778,40 @@ async function leaveRoom() {
   const st = currentStory();
   if (st) await sDel(kVote(state.roomId, st.id, st.round || 1, state.me.id));
   await sDel(kPart(state.roomId, state.me.id));
+  clearSession();
   location.reload();
 }
 document.getElementById('leaveBtn').addEventListener('click', leaveRoom);
+
+/* HOUSEKEEPING: Master menutup room → semua key room ini dihapus dari DB
+   (meta + peserta + seluruh vote). Ini jalur pembersihan utama; cron di SQL
+   hanya jaring pengaman untuk room yang ditinggal tanpa ditutup. */
+async function closeRoom() {
+  const total = state.meta.stories.reduce((a, s) => a + (s.finalPoint || 0), 0);
+  const doneN = state.meta.stories.filter(s => s.status === 'done').length;
+  if (!confirm(
+    'Tutup room "' + state.meta.roomName + '"?\n\n' +
+    doneN + ' story selesai · total ' + total + ' point.\n' +
+    'Semua data room dihapus permanen dari database.\n' +
+    'Hasilnya akan otomatis diunduh sebagai CSV sebelum dihapus.'
+  )) return;
+
+  /* Data akan hilang permanen → unduh CSV dulu, otomatis. */
+  if (state.meta.stories.length) {
+    downloadCsv();
+    toast('Hasil diunduh sebagai CSV');
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  clearInterval(state.timer);
+  const keys = await sList('pp:room:' + state.roomId + ':');
+  if (keys === undefined) { toast('Gagal menutup room: ' + (lastStorageError || 'cek koneksi')); return; }
+  for (const k of keys) await sDel(k);
+  clearSession();
+  alert('Room ditutup. ' + keys.length + ' baris dihapus dari database.');
+  location.reload();
+}
+document.getElementById('closeBtn').addEventListener('click', closeRoom);
 
 /* Master boleh menendang peserta nyangkut (mis. yang salah pilih role lalu tutup tab). */
 async function kickParticipant(pid) {
@@ -676,7 +834,19 @@ document.getElementById('copyCode').addEventListener('click', () => {
 /* ================================================================
    SYNC
    ================================================================ */
-async function tick() { state.pollTick++; await syncAll(); await heartbeat(); render(); }
+async function tick() {
+  state.pollTick++;
+  await syncAll();
+  if (state.roomClosed) {
+    clearInterval(state.timer);
+    clearSession();
+    alert('Room ini sudah ditutup oleh Room Master. Datanya telah dihapus.');
+    location.reload();
+    return;
+  }
+  await heartbeat();
+  render();
+}
 
 async function heartbeat() {
   if (now() - state.lastHeartbeat < HEARTBEAT_MS) return;
@@ -690,6 +860,14 @@ async function heartbeat() {
 
 async function syncAll() {
   const meta = await sGet(kMeta(state.roomId));
+
+  /* GAGAL sync → pertahankan apa yang sudah ada di layar, jangan dikosongkan. */
+  if (meta === undefined) { state.syncOk = false; return; }
+
+  /* meta hilang = room ditutup Master → data sudah dihapus dari DB. */
+  if (meta === null) { state.roomClosed = true; state.syncOk = false; return; }
+
+  state.syncOk = true;
   if (meta) {
     const storyChanged = !state.meta || meta.currentStoryId !== state.meta.currentStoryId;
     const st = meta.stories.find(s => s.id === meta.currentStoryId);
@@ -704,7 +882,9 @@ async function syncAll() {
   }
 
   /* peserta */
-  const ids = (await sList(kPartPre(state.roomId))).map(k => k.split(':').pop());
+  const pKeys = await sList(kPartPre(state.roomId));
+  if (pKeys === undefined) { state.syncOk = false; return; }   // jangan hapus daftar peserta karena error
+  const ids = pKeys.map(k => k.split(':').pop());
   const refreshAll = state.pollTick % 3 === 0;
   for (const id of ids) {
     if (refreshAll || !state.people[id]) {
@@ -722,15 +902,20 @@ async function syncAll() {
   const rd = st.round || 1;
 
   const vKeys = await sList(kVotePre(state.roomId, st.id, rd));
+  if (vKeys === undefined) { state.syncOk = false; return; }   // <- inti bug: dulu [] → "0 vote"
+
   const voterIds = vKeys.map(k => k.split(':').pop())
                         .filter(pid => state.people[pid]);   // abaikan vote orang yang sudah keluar
   voterIds.forEach(pid => state.votedIds.add(pid));
 
   if (state.meta.phase === 'revealed') {
-    /* FIX (bug 4): SELALU ambil nilai segar dari server, tanpa cache sama sekali.
-       Cache lama-lah yang bikin peserta lihat angka ronde sebelumnya. */
+    /* Ambil nilai segar dari server (tanpa cache — cache lama dulu bikin
+       peserta lihat angka ronde sebelumnya). Kalau ADA SATU SAJA yang gagal
+       diambil, tandai sync tidak sehat supaya Master tidak bisa mengunci
+       angka yang belum lengkap. */
     for (const pid of voterIds) {
       const v = await sGet(kVote(state.roomId, st.id, rd, pid));
+      if (v === undefined) { state.syncOk = false; continue; }
       if (v && v.value !== undefined) state.votes[pid] = v.value;
     }
     if (state.votes[state.me.id] !== undefined) state.myVote = state.votes[state.me.id];
@@ -868,6 +1053,18 @@ async function resetVotes() {
 async function acceptStory() {
   const st = currentStory();
   if (!st) return;
+
+  /* PENGAMAN (turunan bug sList): jangan pernah mengunci angka kalau data
+     di layar belum tentu lengkap, atau kalau tidak ada satu pun vote angka. */
+  if (!state.syncOk) {
+    toast('Koneksi bermasalah — angka di layar mungkin belum lengkap. Tunggu sync pulih.');
+    return;
+  }
+  const rr = roleResults();
+  if (rr.dev.mode.n === 0 && rr.qa.mode.n === 0) {
+    if (!confirm('Belum ada vote angka (semua "?" atau belum ada yang vote).\nTetap kunci story ini sebagai 0 point?')) return;
+  }
+
   const r = roleResults();
   const devP = r.dev.final;
   const testP = r.qa.final;
@@ -928,9 +1125,114 @@ function stepOverride(which, dir) {
 
 <script>
 /* ================================================================
+   EXPORT HASIL
+   Penting: "Tutup room" menghapus data permanen dari DB, jadi ini
+   satu-satunya jalan menyimpan hasil grooming. closeRoom() otomatis
+   mengunduh CSV lebih dulu supaya hasil tidak pernah hilang.
+   ================================================================ */
+function exportRows() {
+  return state.meta.stories.map((s, i) => ({
+    no: i + 1,
+    title: s.title,
+    desc: s.desc || '',
+    dev: s.devPoint == null ? '' : s.devPoint,
+    qa: s.testerPoint == null ? '' : s.testerPoint,
+    total: s.finalPoint == null ? '' : s.finalPoint,
+    status: s.status === 'done' ? 'Selesai' : 'Belum diestimasi',
+  }));
+}
+function exportTotals() {
+  const rows = exportRows();
+  const done = rows.filter(r => r.status === 'Selesai');
+  return {
+    rows, done,
+    total: done.reduce((a, r) => a + (Number(r.total) || 0), 0),
+    dev: done.reduce((a, r) => a + (Number(r.dev) || 0), 0),
+    qa: done.reduce((a, r) => a + (Number(r.qa) || 0), 0),
+  };
+}
+function exportAsText() {
+  const t = exportTotals();
+  const lines = [
+    state.meta.roomName + ' — Hasil Planning Poker',
+    new Date().toLocaleString('id-ID'),
+    '',
+  ];
+  t.rows.forEach(r => {
+    lines.push(r.status === 'Selesai'
+      ? r.no + '. ' + r.title + ' → ' + r.total + ' point (Dev ' + r.dev + ' + QA ' + r.qa + ')'
+      : r.no + '. ' + r.title + ' → belum diestimasi');
+  });
+  lines.push('', 'Total: ' + t.total + ' point (Dev ' + t.dev + ' + QA ' + t.qa + ') dari ' + t.done.length + '/' + t.rows.length + ' story');
+  return lines.join('\n');
+}
+function exportAsMarkdown() {
+  const t = exportTotals();
+  const out = ['| # | Story | Dev | QA | Total |', '|---|---|---|---|---|'];
+  t.rows.forEach(r => out.push('| ' + r.no + ' | ' + r.title.replace(/\|/g, '\\|') + ' | ' + r.dev + ' | ' + r.qa + ' | ' + (r.total === '' ? '—' : r.total) + ' |'));
+  out.push('| | **Total** | **' + t.dev + '** | **' + t.qa + '** | **' + t.total + '** |');
+  return out.join('\n');
+}
+function exportAsCsv() {
+  const q = (v) => '"' + String(v).replace(/"/g, '""') + '"';   // escape CSV
+  const t = exportTotals();
+  const out = [['No', 'Story', 'Deskripsi', 'Dev Point', 'QA Point', 'Total Point', 'Status'].map(q).join(',')];
+  t.rows.forEach(r => out.push([r.no, r.title, r.desc, r.dev, r.qa, r.total, r.status].map(q).join(',')));
+  out.push(['', 'TOTAL', '', t.dev, t.qa, t.total, ''].map(q).join(','));
+  return '\ufeff' + out.join('\r\n');   // BOM: biar Excel baca UTF-8 dengan benar
+}
+function downloadCsv() {
+  const name = state.meta.roomName.replace(/[^\w\d]+/g, '-').toLowerCase();
+  const date = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([exportAsCsv()], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'planning-poker-' + name + '-' + date + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function copyText(txt, label) {
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast(label + ' disalin');
+  } catch (e) {
+    /* clipboard butuh HTTPS + izin; fallback ke textarea lama */
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast(label + ' disalin'); }
+    catch (_) { toast('Gagal menyalin — cek Console'); console.log(txt); }
+    ta.remove();
+  }
+}
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  document.getElementById('exportMenu').classList.toggle('hidden');
+});
+document.querySelectorAll('[data-exp]').forEach(b => b.addEventListener('click', () => {
+  if (!state.meta.stories.length) { toast('Belum ada story untuk diekspor'); return; }
+  const k = b.dataset.exp;
+  if (k === 'csv') { downloadCsv(); toast('CSV diunduh'); }
+  else if (k === 'copy') copyText(exportAsText(), 'Ringkasan');
+  else if (k === 'md') copyText(exportAsMarkdown(), 'Tabel Markdown');
+  document.getElementById('exportMenu').classList.add('hidden');
+}));
+
+/* ================================================================
    RENDER
    ================================================================ */
-function render() { renderTable(); renderStories(); renderPeople(); }
+function render() { renderSync(); renderTable(); renderStories(); renderPeople(); }
+
+/* Titik di topbar jadi merah kalau sync terakhir gagal — supaya tidak ada
+   yang mengambil keputusan dari angka yang mungkin sudah basi. */
+function renderSync() {
+  const d = document.querySelector('.me-badge .dot');
+  const t = document.getElementById('meText');
+  if (!d || !t) return;
+  d.classList.toggle('bad', !state.syncOk);
+  const base = state.me.name + ' · ' + (state.isMaster ? 'Room Master' : state.me.role === 'developer' ? 'Developer' : 'Tester / QA');
+  t.textContent = state.syncOk ? base : base + ' · koneksi bermasalah';
+}
 
 function renderTable() {
   const el = document.getElementById('tableEl');
@@ -938,6 +1240,7 @@ function renderTable() {
 
   if (!st) {
     el.innerHTML = '<div class="table-empty">' +
+      '<div class="deck"><i></i><i></i><i></i></div>' +
       '<div class="big">Belum ada story aktif</div>' +
       '<div>' + (state.isMaster ? 'Tambahkan story di panel Story untuk mulai voting.' : 'Menunggu Room Master menambahkan story…') + '</div>' +
       '</div>';
@@ -1013,7 +1316,7 @@ function renderStack(role, revealed) {
 function renderHand() {
   const voted = state.votedIds.has(state.me.id);
   const cards = FIB.map(v => {
-    const small = (v === '?' || v === '☕');
+    const small = (v === '?');
     const sel = state.myVote !== undefined && String(state.myVote) === String(v);
     return '<button class="vcard ' + (small ? 'small' : '') + (sel ? ' sel' : '') + '" data-vote="' + esc(String(v)) + '">' + esc(String(v)) + '</button>';
   }).join('');
@@ -1031,7 +1334,7 @@ function renderResults() {
     /* sebaran: 5×2 artinya angka 5 dipilih 2 orang. Yang jadi modus disorot. */
     const dist = Object.keys(res.mode.freq || {}).map(Number).sort((a, b) => a - b)
       .map(v => '<span class="chip' + (res.mode.winners.includes(v) ? ' win' : '') + '">' + v + '×' + res.mode.freq[v] + '</span>').join('');
-    const nonNum = ['?', '☕'].filter(k => res.vals.includes(k))
+    const nonNum = ['?'].filter(k => res.vals.includes(k))
       .map(k => '<span class="chip">' + k + '</span>').join('');
     const val = state.isMaster
       ? '<div class="stepper"><button data-step="' + key + '" data-dir="-1">−</button>' +
@@ -1084,7 +1387,7 @@ function renderControls(revealed, done) {
 function bindTable() {
   document.querySelectorAll('[data-vote]').forEach(b => b.addEventListener('click', () => {
     let v = b.dataset.vote;
-    if (v !== '?' && v !== '☕') v = Number(v);
+    if (v !== '?') v = Number(v);
     doVote(v);
   }));
   const on = (id, fn) => { const e = document.getElementById(id); if (e) e.addEventListener('click', fn); };
