@@ -1,258 +1,301 @@
-<!-- Planning Poker — kolaborasi estimasi story point untuk sprint grooming -->
+<!-- Planning Poker — estimasi story point kolaboratif untuk sprint grooming -->
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Planning Poker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
 <style>
+  /* ===== PALET (sesuai permintaan: navy / blue / sky / orange / white) ===== */
   :root {
-    --ink: #1a1d29;
-    --paper: #f3f4f2;
-    --surface: #ffffff;
-    --felt: #1f5f5b;
-    --felt-edge: #16413e;
-    --gold: #e0a458;
-    --gold-deep: #c4863a;
-    --dev: #3d5af1;
-    --dev-soft: #eaeeff;
-    --tester: #c8437f;
-    --tester-soft: #fdeaf3;
-    --muted: #6b7280;
-    --line: #e3e4e0;
-    --ok: #2f9e6f;
-    --shadow: 0 1px 2px rgba(26,29,41,.06), 0 8px 24px rgba(26,29,41,.08);
+    --navy:   #0e0f3b;
+    --blue:   #07407b;
+    --sky:    #7fcdee;
+    --orange: #f7931e;
+    --white:  #ffffff;
+
+    --ink: var(--navy);
+    --paper: #eef3f8;
+    --surface: var(--white);
+    --muted: #5b6b84;
+    --line: #dbe4ef;
+
+    --sky-soft: #e8f6fd;
+    --orange-soft: #fef1e0;
+    --blue-soft: #e6eef6;
+
+    --shadow: 0 1px 2px rgba(14,15,59,.06), 0 8px 24px rgba(14,15,59,.10);
     --disp: "Space Grotesk", system-ui, sans-serif;
     --body: "Inter", system-ui, sans-serif;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
   body {
-    font-family: var(--body);
-    color: var(--ink);
-    background: var(--paper);
-    -webkit-font-smoothing: antialiased;
-    line-height: 1.45;
+    font-family: var(--body); color: var(--ink); background: var(--paper);
+    -webkit-font-smoothing: antialiased; line-height: 1.45;
   }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; }
-  input, select { font-family: inherit; font-size: 15px; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; font-size: 16px; } /* 16px: cegah zoom iOS */
   .hidden { display: none !important; }
 
-  /* ---------- LANDING ---------- */
+  /* ===================== LANDING ===================== */
   #landing {
-    min-height: 100%;
-    display: grid;
-    place-items: center;
-    padding: 28px 18px;
-    background:
-      radial-gradient(120% 90% at 50% -10%, #26706b 0%, #1f5f5b 42%, #16413e 100%);
+    min-height: 100vh; display: grid; place-items: center; padding: 20px 16px;
+    background: radial-gradient(130% 100% at 50% -10%, var(--blue) 0%, var(--navy) 70%);
   }
   .join-card {
-    width: 100%;
-    max-width: 440px;
-    background: var(--surface);
-    border-radius: 20px;
-    box-shadow: 0 24px 60px rgba(11,40,38,.35);
-    padding: 32px 30px 30px;
+    width: 100%; max-width: 440px; background: var(--surface);
+    border-radius: 20px; box-shadow: 0 24px 60px rgba(14,15,59,.4); padding: 28px 24px 26px;
   }
-  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
   .brand .pip {
-    width: 40px; height: 52px; border-radius: 7px;
-    background: var(--felt);
-    color: var(--gold);
-    display: grid; place-items: center;
+    width: 40px; height: 52px; border-radius: 8px; flex: none;
+    background: var(--navy); color: var(--orange); display: grid; place-items: center;
     font-family: var(--disp); font-weight: 700; font-size: 20px;
-    box-shadow: inset 0 0 0 2px rgba(224,164,88,.5);
-    transform: rotate(-6deg);
+    box-shadow: inset 0 0 0 2px var(--orange); transform: rotate(-6deg);
   }
-  .brand h1 { font-family: var(--disp); font-size: 24px; margin: 0; letter-spacing: -.02em; }
+  .brand h1 { font-family: var(--disp); font-size: 23px; margin: 0; letter-spacing: -.02em; }
   .brand p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
 
-  .field { margin-top: 18px; }
-  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
-  .field input, .field select {
+  .field { margin-top: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
+  .field input {
     width: 100%; padding: 12px 13px; border-radius: 11px;
-    border: 1.5px solid var(--line); background: #fcfcfb; color: var(--ink);
+    border: 1.5px solid var(--line); background: #fbfcfe; color: var(--ink);
     outline: none; transition: border-color .15s, box-shadow .15s;
   }
-  .field input:focus, .field select:focus { border-color: var(--felt); box-shadow: 0 0 0 3px rgba(31,95,91,.14); }
+  .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(7,64,123,.14); }
 
-  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #eef0ec; padding: 5px; border-radius: 13px; margin-top: 20px; }
-  .tab { padding: 10px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--muted); transition: .15s; }
-  .tab.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--blue-soft); padding: 5px; border-radius: 13px; margin-top: 18px; }
+  .tab { padding: 11px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--muted); transition: .15s; }
+  .tab.active { background: var(--surface); color: var(--navy); box-shadow: var(--shadow); }
 
-  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-  .role-opt {
-    padding: 13px 12px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: #fcfcfb; text-align: left; transition: .15s;
-  }
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .role-opt { padding: 13px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: #fbfcfe; text-align: left; transition: .15s; }
   .role-opt .rt { font-weight: 600; font-size: 14.5px; }
-  .role-opt .rd { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .role-opt[data-sel="1"][data-role="developer"] { border-color: var(--dev); background: var(--dev-soft); }
-  .role-opt[data-sel="1"][data-role="tester"] { border-color: var(--tester); background: var(--tester-soft); }
+  .role-opt .rd { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .role-opt[data-sel="1"][data-role="developer"] { border-color: var(--blue); background: var(--blue-soft); }
+  .role-opt[data-sel="1"][data-role="tester"] { border-color: var(--orange); background: var(--orange-soft); }
 
   .primary {
-    width: 100%; margin-top: 22px; padding: 14px; border-radius: 12px;
-    background: var(--ink); color: #fff; font-weight: 600; font-size: 15px;
-    transition: transform .08s, background .15s;
+    width: 100%; margin-top: 20px; padding: 14px; border-radius: 12px;
+    background: var(--navy); color: var(--white); font-weight: 600; font-size: 15px; transition: .12s;
   }
-  .primary:hover { background: #000; }
+  .primary:hover { background: var(--blue); }
   .primary:active { transform: translateY(1px); }
-  .primary:disabled { opacity: .45; cursor: not-allowed; }
-  .err { color: #c0392b; font-size: 13px; margin-top: 12px; min-height: 1em; }
+  .hint { font-size: 12.5px; color: var(--muted); margin: 14px 0 0; }
+  .err { color: #c0392b; font-size: 13px; margin-top: 12px; min-height: 1em; word-break: break-word; }
 
-  /* ---------- ROOM ---------- */
-  #room { min-height: 100%; display: flex; flex-direction: column; }
+  /* ===================== ROOM ===================== */
+  #room { min-height: 100vh; display: flex; flex-direction: column; }
   .topbar {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 20;
   }
-  .topbar .rn { font-family: var(--disp); font-weight: 600; font-size: 18px; }
+  .topbar .rn { font-family: var(--disp); font-weight: 600; font-size: 17px; }
   .code-chip {
-    display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px;
-    background: var(--felt); color: #eafffb; border-radius: 10px; font-weight: 600; letter-spacing: .12em;
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 6px 5px 11px;
+    background: var(--navy); color: var(--sky); border-radius: 10px; font-weight: 600; letter-spacing: .12em; font-size: 14px;
   }
-  .code-chip button { color: #bff3ec; padding: 4px 8px; border-radius: 7px; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
-  .code-chip button:hover { background: rgba(255,255,255,.14); }
+  .code-chip button { color: var(--sky); padding: 4px 8px; border-radius: 7px; font-size: 12px; font-weight: 600; letter-spacing: 0; }
+  .code-chip button:hover { background: rgba(255,255,255,.16); }
   .spacer { flex: 1; }
-  .me-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  .me-badge { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex: none; }
+  .leave-btn {
+    padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 600;
+    color: var(--muted); border: 1.5px solid var(--line); background: var(--white);
+  }
+  .leave-btn:hover { border-color: #e0b4b4; color: #c0392b; background: #fdf2f2; }
 
-  .layout { flex: 1; display: grid; grid-template-columns: 1fr 320px; gap: 20px; padding: 20px; align-items: start; max-width: 1200px; width: 100%; margin: 0 auto; }
-  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .layout {
+    flex: 1; display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 18px;
+    padding: 18px; align-items: start; max-width: 1240px; width: 100%; margin: 0 auto;
+  }
 
-  /* felt table */
+  /* ---- meja ---- */
   .table {
-    background:
-      radial-gradient(130% 120% at 50% 0%, #2a726c 0%, var(--felt) 45%, var(--felt-edge) 100%);
-    border-radius: 20px; padding: 22px; color: #eafffb;
-    box-shadow: inset 0 0 0 6px rgba(255,255,255,.04), var(--shadow);
-    min-height: 320px;
+    background: linear-gradient(150% 120% at 50% 0%, var(--blue) 0%, var(--navy) 68%);
+    border-radius: 18px; padding: 20px; color: var(--white);
+    box-shadow: inset 0 0 0 1px rgba(127,205,238,.18), var(--shadow); min-height: 300px;
   }
-  .story-head .eyebrow { font-size: 11.5px; text-transform: uppercase; letter-spacing: .14em; color: #a9ded8; font-weight: 600; }
-  .story-head h2 { font-family: var(--disp); font-size: 22px; margin: 4px 0 0; line-height: 1.2; }
-  .story-head .desc { color: #cdeae6; font-size: 14px; margin-top: 6px; white-space: pre-wrap; }
-  .table-empty { text-align: center; padding: 60px 10px; color: #bfe4df; }
-  .table-empty .big { font-family: var(--disp); font-size: 17px; color: #eafffb; margin-bottom: 6px; }
+  .story-head .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--sky); font-weight: 600; }
+  .story-head h2 { font-family: var(--disp); font-size: 21px; margin: 4px 0 0; line-height: 1.25; word-break: break-word; }
+  .story-head .desc { color: #c9def0; font-size: 14px; margin-top: 6px; white-space: pre-wrap; word-break: break-word; }
+  .table-empty { text-align: center; padding: 56px 10px; color: #b7d5ea; }
+  .table-empty .big { font-family: var(--disp); font-size: 17px; color: var(--white); margin-bottom: 6px; }
 
-  /* played card stacks */
-  .played { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
-  @media (max-width: 520px) { .played { grid-template-columns: 1fr; } }
-  .stack h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
-  .role-tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
-  .role-tag.dev { background: var(--dev-soft); color: var(--dev); }
-  .role-tag.tester { background: var(--tester-soft); color: var(--tester); }
-  .cards-row { display: flex; flex-wrap: wrap; gap: 10px; min-height: 78px; }
+  /* ---- kartu yang dimainkan ---- */
+  .played { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .stack h3 { font-size: 12px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .role-tag { padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .role-tag.dev { background: var(--sky); color: var(--navy); }
+  .role-tag.qa { background: var(--orange); color: #45280a; }
+  .vcount { color: #b7d5ea; font-weight: 500; font-size: 12px; }
+  .cards-row { display: flex; flex-wrap: wrap; gap: 10px 12px; min-height: 76px; }
 
-  .pcard {
-    width: 52px; height: 72px; border-radius: 9px; position: relative;
-    perspective: 600px;
-  }
+  .pcard { width: 48px; height: 68px; position: relative; perspective: 600px; margin-bottom: 16px; }
   .pcard .inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
   .pcard.up .inner { transform: rotateY(180deg); }
-  .pcard .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 9px; display: grid; place-items: center; }
-  .pcard .back {
-    background: repeating-linear-gradient(45deg, #16413e 0 6px, #1a4b47 6px 12px);
-    box-shadow: inset 0 0 0 2px rgba(224,164,88,.35);
-  }
-  .pcard .front { transform: rotateY(180deg); background: #fff; color: var(--ink); font-family: var(--disp); font-weight: 700; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-  .pcard .front.dev { box-shadow: inset 0 0 0 2px var(--dev); }
-  .pcard .front.tester { box-shadow: inset 0 0 0 2px var(--tester); }
-  .pcard .name { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 10.5px; color: #cdeae6; white-space: nowrap; max-width: 68px; overflow: hidden; text-overflow: ellipsis; }
-  .waiting { color: #bfe4df; font-size: 13px; align-self: center; }
+  .pcard .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 8px; display: grid; place-items: center; }
+  .pcard .back { background: repeating-linear-gradient(45deg, var(--navy) 0 6px, #1a1c52 6px 12px); box-shadow: inset 0 0 0 2px rgba(127,205,238,.4); }
+  .pcard .back.done::after { content: "✓"; color: var(--sky); font-size: 18px; font-weight: 700; }
+  .pcard .front { transform: rotateY(180deg); background: var(--white); color: var(--navy); font-family: var(--disp); font-weight: 700; font-size: 21px; }
+  .pcard .front.dev { box-shadow: inset 0 0 0 2.5px var(--blue); }
+  .pcard .front.qa  { box-shadow: inset 0 0 0 2.5px var(--orange); }
+  .pcard .nm { position: absolute; bottom: -17px; left: 50%; transform: translateX(-50%); font-size: 10.5px; color: #b7d5ea; white-space: nowrap; max-width: 66px; overflow: hidden; text-overflow: ellipsis; }
+  .waiting { color: #9dc2dd; font-size: 13px; align-self: center; }
 
-  /* results */
-  .result-bar { margin-top: 20px; background: rgba(0,0,0,.16); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .res-block { text-align: center; }
-  .res-block .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #bfe4df; }
-  .res-num { font-family: var(--disp); font-weight: 700; font-size: 30px; line-height: 1; margin-top: 4px; }
-  .res-op { font-family: var(--disp); font-size: 22px; color: #a9ded8; }
-  .res-final { margin-left: auto; text-align: center; }
-  .res-final .res-num { color: var(--gold); font-size: 38px; }
-  .stepper { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
-  .stepper button { width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,.14); color: #fff; font-weight: 700; font-size: 16px; line-height: 1; }
-  .stepper button:hover { background: rgba(255,255,255,.26); }
-  .stepper .val { min-width: 30px; text-align: center; font-family: var(--disp); font-weight: 700; font-size: 18px; }
-  .tie-note { width: 100%; font-size: 12px; color: var(--gold); margin-top: 2px; }
+  /* ---- hasil ---- */
+  .result { margin-top: 22px; background: rgba(0,0,0,.22); border-radius: 14px; padding: 16px; }
+  .res-grid { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .res-block { min-width: 132px; }
+  .res-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--sky); font-weight: 600; }
+  .res-num { font-family: var(--disp); font-weight: 700; font-size: 28px; line-height: 1.1; margin-top: 4px; }
+  .res-op { font-family: var(--disp); font-size: 20px; color: #7f9dbb; align-self: center; padding-top: 14px; }
+  .res-final { margin-left: auto; text-align: right; }
+  .res-final .res-num { color: var(--orange); font-size: 38px; }
+  .dist { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+  .chip { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: rgba(127,205,238,.16); color: var(--sky); font-weight: 600; }
+  .chip.win { background: var(--sky); color: var(--navy); }
+  .stepper { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .stepper button { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,.16); color: var(--white); font-weight: 700; font-size: 17px; line-height: 1; }
+  .stepper button:hover { background: rgba(255,255,255,.3); }
+  .stepper .val { min-width: 32px; text-align: center; font-family: var(--disp); font-weight: 700; font-size: 20px; }
+  .note { font-size: 12px; margin-top: 10px; color: var(--orange); }
+  .note.edited { color: var(--sky); }
 
-  /* hand of cards (voter) */
-  .hand-wrap { margin-top: 20px; }
-  .hand-wrap .ht { font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; color: #bfe4df; margin-bottom: 10px; }
+  /* ---- tangan pemain ---- */
+  .hand-wrap { margin-top: 22px; }
+  .hand-wrap .ht { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--sky); margin-bottom: 10px; font-weight: 600; }
   .hand { display: flex; flex-wrap: wrap; gap: 10px; }
   .vcard {
-    width: 54px; height: 76px; border-radius: 10px; background: #fff; color: var(--ink);
-    font-family: var(--disp); font-weight: 700; font-size: 22px; display: grid; place-items: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,.2); transition: transform .12s, box-shadow .12s, outline-color .12s;
-    outline: 3px solid transparent;
+    width: 54px; height: 76px; border-radius: 10px; background: var(--white); color: var(--navy);
+    font-family: var(--disp); font-weight: 700; font-size: 21px; display: grid; place-items: center;
+    transition: transform .12s, box-shadow .12s; outline: 3px solid transparent;
   }
   .vcard:hover { transform: translateY(-6px); }
-  .vcard.sel { outline-color: var(--gold); transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,.3); }
-  .vcard.small { font-size: 18px; }
+  .vcard.sel { outline-color: var(--orange); transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,.35); }
+  .vcard.small { font-size: 17px; }
+  .locked { margin-top: 20px; color: #b7d5ea; font-size: 13.5px; }
 
-  /* master controls */
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-  .btn { padding: 11px 18px; border-radius: 11px; font-weight: 600; font-size: 14px; transition: .12s; }
-  .btn-gold { background: var(--gold); color: #3a2a12; }
-  .btn-gold:hover { background: var(--gold-deep); color: #fff; }
-  .btn-ghost { background: rgba(255,255,255,.12); color: #eafffb; }
-  .btn-ghost:hover { background: rgba(255,255,255,.2); }
+  .btn { padding: 12px 18px; border-radius: 11px; font-weight: 600; font-size: 14px; transition: .12s; }
+  .btn-orange { background: var(--orange); color: #45280a; }
+  .btn-orange:hover { background: #ffa63c; }
+  .btn-ghost { background: rgba(255,255,255,.14); color: var(--white); }
+  .btn-ghost:hover { background: rgba(255,255,255,.24); }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  /* side rail */
-  .rail { display: flex; flex-direction: column; gap: 16px; }
+  /* ---- panel kanan ---- */
+  .rail { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .panel { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 16px; }
-  .panel h3 { font-family: var(--disp); font-size: 15px; margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; }
+  .panel h3 { font-family: var(--disp); font-size: 15px; margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .panel h3 .count { font-family: var(--body); font-size: 12px; color: var(--muted); font-weight: 500; }
 
   .add-story { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .add-story input, .add-story textarea { width: 100%; padding: 9px 11px; border-radius: 9px; border: 1.5px solid var(--line); background: #fcfcfb; outline: none; resize: vertical; }
-  .add-story textarea { font-family: var(--body); font-size: 14px; min-height: 38px; }
-  .add-story input:focus, .add-story textarea:focus { border-color: var(--felt); }
-  .add-story button { padding: 9px; border-radius: 9px; background: var(--ink); color: #fff; font-weight: 600; font-size: 13.5px; }
+  .add-story input, .add-story textarea {
+    width: 100%; padding: 10px 11px; border-radius: 9px; border: 1.5px solid var(--line);
+    background: #fbfcfe; outline: none; resize: vertical; font-size: 14px;
+  }
+  .add-story textarea { min-height: 38px; }
+  .add-story input:focus, .add-story textarea:focus { border-color: var(--blue); }
+  .add-story button { padding: 10px; border-radius: 9px; background: var(--navy); color: var(--white); font-weight: 600; font-size: 13.5px; }
+  .add-story button:hover { background: var(--blue); }
 
-  .story-item { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 10px; border: 1px solid transparent; }
-  .story-item + .story-item { margin-top: 2px; }
-  .story-item.active { border-color: var(--felt); background: #f1f8f7; }
-  .story-item.clickable { cursor: pointer; }
-  .story-item.clickable:hover { background: #f6f7f5; }
+  .story-item { display: flex; align-items: center; gap: 9px; padding: 9px 8px; border-radius: 10px; border: 1px solid transparent; }
+  .story-item.active { border-color: var(--blue); background: var(--blue-soft); }
   .si-status { width: 9px; height: 9px; border-radius: 50%; flex: none; }
   .si-status.pending { background: var(--line); }
-  .si-status.active { background: var(--gold); box-shadow: 0 0 0 3px rgba(224,164,88,.25); }
-  .si-status.done { background: var(--ok); }
-  .si-title { flex: 1; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .si-status.active { background: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+  .si-status.done { background: var(--blue); }
+  .si-main { flex: 1; min-width: 0; }
+  .si-title { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .si-title.clickable { cursor: pointer; }
+  .si-title.clickable:hover { color: var(--blue); }
   .si-title.done { color: var(--muted); }
-  .si-point { font-family: var(--disp); font-weight: 700; font-size: 14px; color: var(--felt); }
+  .si-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .si-point { font-family: var(--disp); font-weight: 700; font-size: 15px; color: var(--blue); flex: none; }
+  .si-acts { display: flex; gap: 2px; flex: none; }
+  .icon-btn { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+  .icon-btn:hover { background: var(--blue-soft); color: var(--blue); }
+  .icon-btn.danger:hover { background: #fdf2f2; color: #c0392b; }
+  .edit-row { display: flex; gap: 6px; width: 100%; }
+  .edit-row input { flex: 1; min-width: 0; padding: 7px 9px; border-radius: 8px; border: 1.5px solid var(--blue); outline: none; font-size: 13.5px; }
 
   .total-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
-  .total-row .tl { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-  .total-row .tv { font-family: var(--disp); font-weight: 700; font-size: 22px; color: var(--gold-deep); }
+  .total-row .tl { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .total-row .tv { font-family: var(--disp); font-weight: 700; font-size: 22px; color: var(--orange); }
 
-  .plist { display: flex; flex-direction: column; gap: 4px; }
-  .prow { display: flex; align-items: center; gap: 9px; padding: 6px 6px; border-radius: 9px; }
-  .pav { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-family: var(--disp); font-weight: 700; font-size: 13px; color: #fff; flex: none; }
-  .pav.master { background: var(--felt); }
-  .pav.developer { background: var(--dev); }
-  .pav.tester { background: var(--tester); }
-  .pname { flex: 1; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .plist { display: flex; flex-direction: column; gap: 3px; }
+  .prow { display: flex; align-items: center; gap: 9px; padding: 6px; border-radius: 9px; }
+  .prow:hover .kick { opacity: 1; }
+  .pav { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-family: var(--disp); font-weight: 700; font-size: 12.5px; flex: none; }
+  .pav.master { background: var(--navy); color: var(--sky); }
+  .pav.developer { background: var(--blue); color: var(--white); }
+  .pav.tester { background: var(--orange); color: #45280a; }
+  .pinfo { flex: 1; min-width: 0; }
+  .pname { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pname .you { font-size: 11px; color: var(--muted); }
-  .pstate { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
-  .pstate.voted { background: #e7f6ee; color: var(--ok); }
-  .pstate.thinking { background: #f0f0ee; color: var(--muted); }
-  .pstate.off { background: #f6f6f4; color: #b8bab4; }
+  .prole { font-size: 11px; color: var(--muted); }
+  .pstate { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; flex: none; }
+  .pstate.voted { background: var(--sky-soft); color: var(--blue); }
+  .pstate.thinking { background: #f1f4f8; color: var(--muted); }
+  .pstate.off { background: #f4f5f7; color: #a8b0bd; }
+  .kick { opacity: 0; transition: opacity .12s; }
 
   .toast {
-    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 11px; font-size: 14px;
-    box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: .25s;
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--navy); color: var(--white); padding: 11px 18px; border-radius: 11px; font-size: 14px;
+    box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: .25s; z-index: 50;
+    max-width: calc(100vw - 32px); text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: minmax(0,1fr); gap: 14px; padding: 14px; }
+  }
+  @media (max-width: 620px) {
+    .topbar { padding: 9px 12px; gap: 8px; }
+    .topbar .rn { font-size: 15px; width: 100%; }
+    .me-badge { font-size: 12px; }
+    .layout { padding: 12px; }
+    .table { padding: 16px; border-radius: 16px; }
+    .story-head h2 { font-size: 18px; }
+
+    /* dua stack jadi bertumpuk supaya kartu tidak gepeng */
+    .played { grid-template-columns: 1fr; gap: 22px; }
+
+    /* hand: grid rapi, target sentuh besar */
+    .hand { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .vcard { width: 100%; height: 64px; font-size: 19px; }
+    .vcard:hover { transform: none; }
+    .vcard.sel { transform: translateY(-4px); }
+
+    .pcard { width: 44px; height: 62px; }
+    .pcard .front { font-size: 19px; }
+
+    .res-grid { gap: 12px; }
+    .res-block { min-width: 108px; }
+    .res-op { padding-top: 12px; }
+    .res-final { margin-left: 0; text-align: left; width: 100%; padding-top: 10px; border-top: 1px solid rgba(127,205,238,.2); }
+    .res-final .res-num { font-size: 32px; }
+
+    .controls .btn { flex: 1; min-width: 130px; text-align: center; }
+    .join-card { padding: 24px 18px 22px; }
+  }
+  @media (max-width: 380px) {
+    .hand { grid-template-columns: repeat(4, 1fr); }
+  }
 </style>
 
-<!-- Supabase client (dipakai saat di-deploy di luar Claude, mis. Vercel) -->
+<!-- Supabase client (dipakai saat deploy di luar Claude, mis. Vercel) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ==================== LANDING ==================== -->
+<!-- ===================== LANDING ===================== -->
 <section id="landing">
   <div class="join-card">
     <div class="brand">
@@ -273,34 +316,31 @@
       <button class="tab" data-mode="join">Gabung room</button>
     </div>
 
-    <!-- create -->
     <div id="createPane">
       <div class="field">
         <label for="roomNameInput">Nama room / sprint</label>
-        <input id="roomNameInput" type="text" placeholder="cth. Grooming Sprint 24" maxlength="40" autocomplete="off" />
+        <input id="roomNameInput" type="text" placeholder="cth. Grooming Sprint 66" maxlength="40" autocomplete="off" />
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin:14px 0 0">
-        Kamu jadi <strong>Room Master</strong> — atur story & buka kartu. Master tidak ikut ngevote.
-      </p>
+      <p class="hint">Kamu jadi <strong>Room Master</strong> — atur story &amp; buka kartu. Master tidak ikut ngevote.</p>
       <button class="primary" id="createBtn">Buat room &amp; mulai</button>
     </div>
 
-    <!-- join -->
     <div id="joinPane" class="hidden">
       <div class="field">
         <label for="codeInput">Kode room</label>
-        <input id="codeInput" type="text" placeholder="cth. K7QP2" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.18em;font-weight:600" />
+        <input id="codeInput" type="text" placeholder="cth. K7QP2" maxlength="6" autocomplete="off"
+               style="text-transform:uppercase;letter-spacing:.18em;font-weight:600" />
       </div>
       <div class="field">
         <label>Peran kamu</label>
         <div class="roles">
           <button class="role-opt" data-role="developer">
             <div class="rt">Developer</div>
-            <div class="rd">Estimasi effort ngoding</div>
+            <div class="rd">Effort ngoding</div>
           </button>
           <button class="role-opt" data-role="tester">
             <div class="rt">Tester / QA</div>
-            <div class="rd">Estimasi effort testing</div>
+            <div class="rd">Effort testing</div>
           </button>
         </div>
       </div>
@@ -311,7 +351,7 @@
   </div>
 </section>
 
-<!-- ==================== ROOM ==================== -->
+<!-- ===================== ROOM ===================== -->
 <section id="room" class="hidden">
   <div class="topbar">
     <span class="rn" id="roomTitle">—</span>
@@ -321,18 +361,17 @@
     </span>
     <span class="spacer"></span>
     <span class="me-badge"><span class="dot"></span><span id="meText">—</span></span>
+    <button class="leave-btn" id="leaveBtn">Keluar</button>
   </div>
 
   <div class="layout">
-    <!-- main table -->
-    <div class="table" id="tableEl"><!-- rendered --></div>
+    <div class="table" id="tableEl"></div>
 
-    <!-- side rail -->
     <div class="rail">
-      <div class="panel" id="storyPanel">
+      <div class="panel">
         <h3>Story <span class="count" id="storyCount"></span></h3>
         <div id="addStoryWrap" class="add-story hidden">
-          <input id="stTitle" type="text" placeholder="Judul story" maxlength="80" />
+          <input id="stTitle" type="text" placeholder="Judul story" maxlength="90" />
           <textarea id="stDesc" placeholder="Deskripsi (opsional)" maxlength="300"></textarea>
           <button id="addStoryBtn">Tambah story</button>
         </div>
@@ -354,87 +393,84 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============================================================
-   Planning Poker — vanilla JS, shared storage (multiplayer)
-   Anti-race-condition: tiap peserta hanya menulis key miliknya.
-   ============================================================ */
-
-const FIB = [0, 1, 2, 3, 5, 8, 13, 21, '?', '☕'];
-const HEARTBEAT_MS = 9000;
-const POLL_MS = 2200;
-const OFFLINE_MS = 26000;
+/* ================================================================
+   Planning Poker — vanilla JS
+   Backend: window.storage (preview Claude) ATAU Supabase (deploy).
+   Anti race-condition: tiap peserta HANYA menulis key miliknya sendiri.
+   ================================================================ */
 
 /* ============================================================
    >>> KONFIG BACKEND — isi 2 baris ini saat deploy ke Vercel <<<
 
-   SUPABASE_URL : HANYA domain. Jangan sertakan "/rest/v1" dan
-                  jangan ada "/" di ujung — supabase-js menambahkan
-                  path-nya sendiri. Kalau dobel → error PGRST125.
+   SUPABASE_URL : HANYA domain. Jangan sertakan "/rest/v1" dan jangan
+                  ada "/" di ujung — supabase-js menambahkan path-nya
+                  sendiri. Kalau dobel → error PGRST125.
        BENAR  → https://abcdefgh.supabase.co
        SALAH  → https://abcdefgh.supabase.co/rest/v1
-       SALAH  → https://abcdefgh.supabase.co/
 
-   SUPABASE_ANON_KEY : publishable key (sb_publishable_...) atau
-                  anon key legacy (eyJhbGci...).
-                  JANGAN pakai service_role / sb_secret_...
+   SUPABASE_ANON_KEY : publishable key (sb_publishable_...) atau anon
+                  key legacy (eyJhbGci...). JANGAN service_role.
    ============================================================ */
 const SUPABASE_URL = "https://rgqnbuplwcxrkjvhgmkf.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJncW5idXBsd2N4cmtqdmhnbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjA1ODAsImV4cCI6MjA5OTI5NjU4MH0.DIQclBZWbRqY5-Suas8HXcOtT0iV_ULrAaI-e0pCsG8";
 
-/* Normalisasi URL: buang trailing slash & suffix /rest/v1 kalau kebawa.
-   supabase-js menambahkan /rest/v1 sendiri — kalau dobel → error PGRST125. */
+/* Normalisasi URL supaya salah-tempel tidak bikin PGRST125 lagi. */
 function normalizeSupabaseUrl(u) {
-  return String(u || '')
-    .trim()
-    .replace(/\/+$/, '')            // slash di ujung
-    .replace(/\/rest\/v1$/i, '')    // /rest/v1 kalau ikut ke-copy
+  return String(u || '').trim()
+    .replace(/\/+$/, '')
+    .replace(/\/rest\/v1$/i, '')
     .replace(/\/+$/, '');
 }
 
-/* Auto-pilih backend: storage bawaan Claude kalau ada, kalau nggak → Supabase */
 const claudeStore = (typeof window !== 'undefined' && window.storage) ? window.storage : null;
 let sb = null;
 let configError = '';
 if (!claudeStore) {
-  const url = normalizeSupabaseUrl(SUPABASE_URL);
-  const key = String(SUPABASE_ANON_KEY || '').trim();
-  if (!window.supabase) {
-    configError = 'Library Supabase gagal dimuat (cek koneksi / CDN).';
-  } else if (!/^https:\/\/[^/]+\.supabase\.co$/.test(url)) {
-    configError = 'SUPABASE_URL tidak valid. Harus persis: https://<project-id>.supabase.co';
-  } else if (!key || key.startsWith('YOUR-')) {
-    configError = 'SUPABASE_ANON_KEY belum diisi.';
-  } else {
-    try {
-      sb = window.supabase.createClient(url, key);
-      console.log('[PP] Supabase aktif →', url + '/rest/v1/pp_kv');
-    } catch (e) { configError = 'Supabase init gagal: ' + e.message; }
+  const _url = normalizeSupabaseUrl(SUPABASE_URL);
+  const _key = String(SUPABASE_ANON_KEY || '').trim();
+  if (!window.supabase) configError = 'Library Supabase gagal dimuat (cek koneksi/CDN).';
+  else if (!/^https:\/\/[^/]+\.supabase\.co$/.test(_url)) configError = 'SUPABASE_URL tidak valid. Harus: https://<project-id>.supabase.co';
+  else if (!_key || _key.startsWith('YOUR-')) configError = 'SUPABASE_ANON_KEY belum diisi.';
+  else {
+    try { sb = window.supabase.createClient(_url, _key); console.log('[PP] Supabase aktif →', _url + '/rest/v1/pp_kv'); }
+    catch (e) { configError = 'Supabase init gagal: ' + e.message; }
   }
-  if (configError) console.error('[PP]', configError, '| URL terbaca:', url);
+  if (configError) console.error('[PP]', configError);
 }
 const storageReady = () => !!(claudeStore || sb);
 let lastStorageError = '';
 
+/* ---------- konstanta ---------- */
+const FIB = [0, 1, 2, 3, 5, 8, 13, 21, '?', '☕'];
+const NUM_FIB = FIB.filter(v => typeof v === 'number');
+const POLL_MS = 2200;
+const HEARTBEAT_MS = 8000;
+const OFFLINE_MS = 25000;
+
+/* ---------- state ---------- */
 const state = {
-  mode: 'create',          // landing tab
+  mode: 'create',
   joinRole: null,
-  me: null,                // {id, name, role}
+  me: null,
   roomId: null,
   isMaster: false,
-  meta: null,              // room meta object
-  people: {},              // id -> participant {..., _fetched}
-  votes: {},               // participantId -> value (only for current story)
-  votedIds: new Set(),     // who has voted on current story
-  revealCache: {},         // storyId::pid -> value
-  lastHeartbeat: 0,
+  meta: null,
+  people: {},          // id -> participant
+  votedIds: new Set(), // siapa yang sudah vote di story+ronde saat ini
+  votes: {},           // pid -> value (HANYA diisi saat phase 'revealed')
+  myVote: undefined,   // vote saya di story+ronde saat ini
+  editingStoryId: null,
   pollTick: 0,
-  myVoteVal: undefined,
+  lastHeartbeat: 0,
+  timer: null,
 };
 
-/* ---------- storage helpers (dual-backend, defensive) ----------
-   Kontrak: selalu terima/kembalikan OBJECT (bukan string).
-   - Claude: value disimpan sebagai string → stringify/parse.
-   - Supabase: kolom jsonb → object langsung. */
+/* FIX (bug 4 & story-point-0): override HANYA berisi nilai kalau Master
+   benar-benar menekan +/-. null = "pakai hasil hitung modus".
+   Dulu di-latch pada render pertama saat vote belum ke-fetch → nyangkut di 0. */
+const override = { dev: null, tester: null };
+
+/* ---------- storage helpers (dual backend) ---------- */
 async function sGet(key) {
   try {
     if (claudeStore) { const r = await claudeStore.get(key, true); return r ? JSON.parse(r.value) : null; }
@@ -445,20 +481,11 @@ async function sGet(key) {
 }
 async function sSet(key, val) {
   try {
-    if (claudeStore) { await claudeStore.set(key, JSON.stringify(val), true); return true; }
+    if (claudeStore) { await claudeStore.set(key, JSON.stringify(val), true); lastStorageError = ''; return true; }
     const { error } = await sb.from('pp_kv').upsert({ key, value: val, updated_at: new Date().toISOString() });
-    if (error) {
-      lastStorageError = `${error.message}${error.hint ? ' — ' + error.hint : ''}`;
-      console.error('Supabase set fail:', key, error);
-      return false;
-    }
-    lastStorageError = '';
-    return true;
-  } catch (e) {
-    lastStorageError = e.message || String(e);
-    console.error('set fail', key, e);
-    return false;
-  }
+    if (error) { lastStorageError = error.message + (error.hint ? ' — ' + error.hint : ''); console.error('set fail', key, error); return false; }
+    lastStorageError = ''; return true;
+  } catch (e) { lastStorageError = e.message || String(e); return false; }
 }
 async function sList(prefix) {
   try {
@@ -475,14 +502,18 @@ async function sDel(key) {
   } catch (e) {}
 }
 
-/* ---------- key builders ---------- */
+/* ---------- key builders ----------
+   FIX (bug 4): key vote sekarang mengandung ROUND.
+   Reset vote = naikkan round → key baru → mustahil kebaca nilai ronde lama.
+   Ini menghapus kebutuhan cache yang dulu bikin peserta lihat angka basi. */
 const kMeta = (r) => `pp:room:${r}:meta`;
 const kPart = (r, pid) => `pp:room:${r}:p:${pid}`;
-const kVote = (r, sid, pid) => `pp:room:${r}:v:${sid}:${pid}`;
-const kVotePrefix = (r, sid) => `pp:room:${r}:v:${sid}:`;
-const kPartPrefix = (r) => `pp:room:${r}:p:`;
+const kPartPre = (r) => `pp:room:${r}:p:`;
+const kVote = (r, sid, rd, pid) => `pp:room:${r}:v:${sid}:${rd}:${pid}`;
+const kVotePre = (r, sid, rd) => `pp:room:${r}:v:${sid}:${rd}:`;
+const kStoryPre = (r, sid) => `pp:room:${r}:v:${sid}:`;
 
-/* ---------- utils ---------- */
+/* ---------- util ---------- */
 const now = () => Date.now();
 const uid = () => Math.random().toString(36).slice(2, 10);
 function roomCode() {
@@ -490,33 +521,44 @@ function roomCode() {
   let s = ''; for (let i = 0; i < 5; i++) s += A[Math.floor(Math.random() * A.length)];
   return s;
 }
-const esc = (s) => (s == null ? '' : String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])));
-const initials = (n) => n.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+const esc = (s) => s == null ? '' : String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const initials = (n) => (n || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+const isOffline = (p) => now() - (p.lastSeen || 0) > OFFLINE_MS;
 
 let toastTimer;
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-/* mode = value paling sering dipilih. Non-angka (?, ☕) diabaikan.
-   Kalau seri, ambil nilai lebih besar (konservatif) + tandai. */
+/* FIX (bug 3): default = nilai yang PALING BANYAK dipilih (modus).
+   Kalau benar-benar seri (semua beda / imbang), ambil yang tertinggi di antara
+   yang seri sebagai default konservatif — dan ditandai supaya Master sadar
+   itu perlu didiskusikan, bukan angka final. */
 function computeMode(values) {
   const nums = values.filter(v => typeof v === 'number');
-  if (!nums.length) return { value: null, tie: false, freq: {}, count: 0 };
   const freq = {};
-  nums.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+  values.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+  if (!nums.length) return { value: null, tie: false, winners: [], freq, n: 0 };
+  const nfreq = {};
+  nums.forEach(v => { nfreq[v] = (nfreq[v] || 0) + 1; });
   let max = 0;
-  Object.values(freq).forEach(c => { if (c > max) max = c; });
-  const winners = Object.keys(freq).filter(v => freq[v] === max).map(Number).sort((a, b) => a - b);
-  return { value: winners[winners.length - 1], tie: winners.length > 1, winners, freq, count: nums.length };
+  Object.keys(nfreq).forEach(k => { if (nfreq[k] > max) max = nfreq[k]; });
+  const winners = Object.keys(nfreq).map(Number).filter(v => nfreq[v] === max).sort((a, b) => a - b);
+  return {
+    value: winners[winners.length - 1],   // seri → ambil tertinggi
+    tie: winners.length > 1,
+    winners, freq: nfreq, allFreq: freq, n: nums.length, max,
+  };
 }
+</script>
 
-/* ============================================================
+<script>
+/* ================================================================
    LANDING
-   ============================================================ */
+   ================================================================ */
 const nameInput = document.getElementById('nameInput');
 const landErr = document.getElementById('landErr');
 
@@ -537,25 +579,21 @@ document.querySelectorAll('.role-opt').forEach(btn => {
   });
 });
 
-document.getElementById('createBtn').addEventListener('click', createRoom);
-document.getElementById('joinBtn').addEventListener('click', joinRoom);
-
 async function createRoom() {
   const name = nameInput.value.trim();
   const roomName = document.getElementById('roomNameInput').value.trim();
   if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
   if (!roomName) return (landErr.textContent = 'Kasih nama room / sprint-nya.');
-  if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap — isi SUPABASE_URL & SUPABASE_ANON_KEY di kode.');
+  if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap.');
 
   const rid = roomCode();
   const me = { id: uid(), name, role: 'master' };
   const meta = {
-    roomId: rid, roomName, masterId: me.id, masterName: name,
-    createdAt: now(), fib: FIB, currentStoryId: null, phase: 'voting',
-    stories: [], updatedAt: now(),
+    roomId: rid, roomName, masterId: me.id, createdAt: now(),
+    currentStoryId: null, phase: 'voting', stories: [], updatedAt: now(),
   };
-  const ok = await sSet(kMeta(rid), meta);
-  if (!ok) return (landErr.textContent = 'Gagal membuat room: ' + (lastStorageError || 'penyebab tidak diketahui — cek Console.'));
+  if (!(await sSet(kMeta(rid), meta)))
+    return (landErr.textContent = 'Gagal membuat room: ' + (lastStorageError || 'cek Console.'));
   await sSet(kPart(rid, me.id), { ...me, joinedAt: now(), lastSeen: now() });
   enterRoom(rid, me, true, meta);
 }
@@ -566,109 +604,158 @@ async function joinRoom() {
   if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
   if (!code) return (landErr.textContent = 'Masukkan kode room.');
   if (!state.joinRole) return (landErr.textContent = 'Pilih peran kamu (Developer / Tester).');
-  if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap — isi SUPABASE_URL & SUPABASE_ANON_KEY di kode.');
+  if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap.');
 
   const meta = await sGet(kMeta(code));
   if (!meta) return (landErr.textContent = 'Room tidak ditemukan. Cek lagi kodenya.');
 
   const me = { id: uid(), name, role: state.joinRole };
-  await sSet(kPart(code, me.id), { ...me, joinedAt: now(), lastSeen: now() });
+  if (!(await sSet(kPart(code, me.id), { ...me, joinedAt: now(), lastSeen: now() })))
+    return (landErr.textContent = 'Gagal gabung: ' + (lastStorageError || 'cek Console.'));
   enterRoom(code, me, false, meta);
 }
 
-/* ============================================================
-   ENTER ROOM
-   ============================================================ */
+document.getElementById('createBtn').addEventListener('click', createRoom);
+document.getElementById('joinBtn').addEventListener('click', joinRoom);
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') state.mode === 'create' ? createRoom() : joinRoom(); });
+document.getElementById('roomNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') createRoom(); });
+document.getElementById('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+
+/* ================================================================
+   MASUK / KELUAR ROOM
+   ================================================================ */
 function enterRoom(rid, me, isMaster, meta) {
   state.roomId = rid; state.me = me; state.isMaster = isMaster; state.meta = meta;
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('room').classList.remove('hidden');
-
   document.getElementById('roomTitle').textContent = meta.roomName;
   document.getElementById('roomCodeText').textContent = rid;
-  const roleLabel = isMaster ? 'Room Master' : (me.role === 'developer' ? 'Developer' : 'Tester / QA');
-  document.getElementById('meText').textContent = `${me.name} · ${roleLabel}`;
+  document.getElementById('meText').textContent =
+    me.name + ' · ' + (isMaster ? 'Room Master' : me.role === 'developer' ? 'Developer' : 'Tester / QA');
   document.getElementById('addStoryWrap').classList.toggle('hidden', !isMaster);
 
   syncAll().then(render);
-  setInterval(tick, POLL_MS);
+  state.timer = setInterval(tick, POLL_MS);
+}
+
+/* FITUR 1: keluar room. Hapus key peserta + vote-nya di story aktif,
+   supaya daftar peserta di layar orang lain langsung bersih. */
+async function leaveRoom() {
+  const others = Object.values(state.people).filter(p => p.id !== state.me.id).length;
+  const msg = state.isMaster && others
+    ? 'Kamu Room Master. Kalau keluar, tidak ada yang bisa buka kartu / kunci story. Tetap keluar?'
+    : 'Keluar dari room? Kamu bisa gabung lagi dengan peran berbeda.';
+  if (!confirm(msg)) return;
+
+  clearInterval(state.timer);
+  const st = currentStory();
+  if (st) await sDel(kVote(state.roomId, st.id, st.round || 1, state.me.id));
+  await sDel(kPart(state.roomId, state.me.id));
+  location.reload();
+}
+document.getElementById('leaveBtn').addEventListener('click', leaveRoom);
+
+/* Master boleh menendang peserta nyangkut (mis. yang salah pilih role lalu tutup tab). */
+async function kickParticipant(pid) {
+  const p = state.people[pid];
+  if (!p || !confirm('Keluarkan ' + p.name + ' dari room?')) return;
+  const st = currentStory();
+  if (st) await sDel(kVote(state.roomId, st.id, st.round || 1, pid));
+  await sDel(kPart(state.roomId, pid));
+  delete state.people[pid];
+  toast(p.name + ' dikeluarkan');
+  await syncAll(); render();
 }
 
 document.getElementById('copyCode').addEventListener('click', () => {
-  const code = state.roomId;
   const done = () => toast('Kode room disalin');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(code).then(done).catch(done);
-  } else { done(); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(state.roomId).then(done).catch(done);
+  else done();
 });
 
-/* Tambah story — tombol + Enter di kolom judul */
-document.getElementById('addStoryBtn').addEventListener('click', addStory);
-document.getElementById('stTitle').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); addStory(); }
-});
-
-/* ============================================================
-   POLL / SYNC
-   ============================================================ */
-async function tick() {
-  state.pollTick++;
-  await syncAll();
-  await heartbeat();
-  render();
-}
+/* ================================================================
+   SYNC
+   ================================================================ */
+async function tick() { state.pollTick++; await syncAll(); await heartbeat(); render(); }
 
 async function heartbeat() {
   if (now() - state.lastHeartbeat < HEARTBEAT_MS) return;
   state.lastHeartbeat = now();
   const p = state.people[state.me.id] || { ...state.me, joinedAt: now() };
-  await sSet(kPart(state.roomId, state.me.id), { ...p, id: state.me.id, name: state.me.name, role: state.me.role, lastSeen: now() });
+  await sSet(kPart(state.roomId, state.me.id), {
+    id: state.me.id, name: state.me.name, role: state.me.role,
+    joinedAt: p.joinedAt || now(), lastSeen: now(),
+  });
 }
 
 async function syncAll() {
   const meta = await sGet(kMeta(state.roomId));
-  if (meta) state.meta = meta;
+  if (meta) {
+    const storyChanged = !state.meta || meta.currentStoryId !== state.meta.currentStoryId;
+    const st = meta.stories.find(s => s.id === meta.currentStoryId);
+    const prevSt = state.meta && state.meta.stories.find(s => s.id === state.meta.currentStoryId);
+    const roundChanged = st && prevSt && st.id === prevSt.id && (st.round || 1) !== (prevSt.round || 1);
+    state.meta = meta;
+    /* Ganti story ATAU ronde baru → buang jejak ronde lama. */
+    if (storyChanged || roundChanged) {
+      state.myVote = undefined;
+      override.dev = null; override.tester = null;
+    }
+  }
 
-  // participants: refresh key list each poll; fetch values for new keys always,
-  // and refresh everyone every ~4 ticks for presence.
-  const pKeys = await sList(kPartPrefix(state.roomId));
-  const ids = pKeys.map(k => k.split(':').pop());
-  const refreshAll = state.pollTick % 4 === 0;
+  /* peserta */
+  const ids = (await sList(kPartPre(state.roomId))).map(k => k.split(':').pop());
+  const refreshAll = state.pollTick % 3 === 0;
   for (const id of ids) {
     if (refreshAll || !state.people[id]) {
       const p = await sGet(kPart(state.roomId, id));
       if (p) state.people[id] = p;
     }
   }
-  // drop participants whose key disappeared
   Object.keys(state.people).forEach(id => { if (!ids.includes(id)) delete state.people[id]; });
 
-  // votes for current story
-  const sid = state.meta ? state.meta.currentStoryId : null;
+  /* vote story aktif */
   state.votedIds = new Set();
   state.votes = {};
-  if (sid) {
-    const vKeys = await sList(kVotePrefix(state.roomId, sid));
-    vKeys.forEach(k => state.votedIds.add(k.split(':').pop()));
-    if (state.meta.phase === 'revealed') {
-      for (const pid of state.votedIds) {
-        const ck = `${sid}::${pid}`;
-        if (state.revealCache[ck] === undefined) {
-          const v = await sGet(kVote(state.roomId, sid, pid));
-          if (v) state.revealCache[ck] = v.value;
-        }
-        if (state.revealCache[ck] !== undefined) state.votes[pid] = state.revealCache[ck];
-      }
+  const st = currentStory();
+  if (!st) return;
+  const rd = st.round || 1;
+
+  const vKeys = await sList(kVotePre(state.roomId, st.id, rd));
+  const voterIds = vKeys.map(k => k.split(':').pop())
+                        .filter(pid => state.people[pid]);   // abaikan vote orang yang sudah keluar
+  voterIds.forEach(pid => state.votedIds.add(pid));
+
+  if (state.meta.phase === 'revealed') {
+    /* FIX (bug 4): SELALU ambil nilai segar dari server, tanpa cache sama sekali.
+       Cache lama-lah yang bikin peserta lihat angka ronde sebelumnya. */
+    for (const pid of voterIds) {
+      const v = await sGet(kVote(state.roomId, st.id, rd, pid));
+      if (v && v.value !== undefined) state.votes[pid] = v.value;
     }
+    if (state.votes[state.me.id] !== undefined) state.myVote = state.votes[state.me.id];
+  } else if (state.votedIds.has(state.me.id) && state.myVote === undefined) {
+    /* Saat voting, nilai orang lain TIDAK diambil (biar tidak bisa diintip lewat
+       Network tab). Yang diambil cuma vote sendiri — untuk highlight kartu. */
+    const mine = await sGet(kVote(state.roomId, st.id, rd, state.me.id));
+    if (mine) state.myVote = mine.value;
   }
 }
+</script>
 
-/* ============================================================
+<script>
+/* ================================================================
    ACTIONS
-   ============================================================ */
+   ================================================================ */
+function currentStory() {
+  if (!state.meta) return null;
+  return state.meta.stories.find(s => s.id === state.meta.currentStoryId) || null;
+}
+
 async function saveMeta(patch) {
   state.meta = { ...state.meta, ...patch, updatedAt: now() };
   const ok = await sSet(kMeta(state.roomId), state.meta);
+  if (!ok) toast('Gagal menyimpan: ' + (lastStorageError || 'cek Console'));
   render();
   return ok;
 }
@@ -678,321 +765,434 @@ async function addStory() {
   const d = document.getElementById('stDesc');
   const title = t.value.trim();
   if (!title) { toast('Judul story belum diisi'); t.focus(); return; }
-  const story = { id: uid(), title, desc: d.value.trim(), status: 'pending', devPoint: null, testerPoint: null, finalPoint: null };
+
+  const story = {
+    id: uid(), title, desc: d.value.trim(), status: 'pending', round: 1,
+    devPoint: null, testerPoint: null, finalPoint: null, decidedAt: null,
+  };
   const stories = [...state.meta.stories, story];
   const patch = { stories };
-  if (!state.meta.currentStoryId) { patch.currentStoryId = story.id; patch.phase = 'voting'; story.status = 'active'; }
-  const ok = await saveMeta(patch);
-  if (!ok) { toast('Gagal menyimpan: ' + (lastStorageError || 'cek Console')); return; }
-  t.value = ''; d.value = '';
-  t.focus();
+  if (!state.meta.currentStoryId) { story.status = 'active'; patch.currentStoryId = story.id; patch.phase = 'voting'; }
+
+  if (!(await saveMeta(patch))) return;
+  t.value = ''; d.value = ''; t.focus();
   toast('Story ditambahkan');
 }
+document.getElementById('addStoryBtn').addEventListener('click', addStory);
+document.getElementById('stTitle').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addStory(); } });
 
 async function setActiveStory(sid) {
+  override.dev = null; override.tester = null;
+  state.myVote = undefined;
   const stories = state.meta.stories.map(s => ({
     ...s,
-    status: s.id === sid ? 'active' : (s.status === 'active' ? 'pending' : s.status),
+    status: s.id === sid ? (s.status === 'done' ? 'done' : 'active')
+                         : (s.status === 'active' ? 'pending' : s.status),
   }));
   await saveMeta({ stories, currentStoryId: sid, phase: 'voting' });
 }
 
-async function castVote(value) {
-  const sid = state.meta.currentStoryId;
-  if (!sid || state.meta.phase !== 'voting') return;
-  await sSet(kVote(state.roomId, sid, state.me.id), {
-    participantId: state.me.id, storyId: sid, value, name: state.me.name, role: state.me.role, votedAt: now(),
+/* FITUR 7: Master bisa rename & hapus story. */
+async function renameStory(sid, title) {
+  const t = title.trim();
+  if (!t) { toast('Judul tidak boleh kosong'); return; }
+  const stories = state.meta.stories.map(s => s.id === sid ? { ...s, title: t } : s);
+  state.editingStoryId = null;
+  await saveMeta({ stories });
+  toast('Judul diperbarui');
+}
+
+async function deleteStory(sid) {
+  const s = state.meta.stories.find(x => x.id === sid);
+  if (!s) return;
+  if (!confirm('Hapus story "' + s.title + '"? Semua vote-nya ikut terhapus.')) return;
+
+  /* bersihkan semua vote story ini (semua ronde) */
+  const keys = await sList(kStoryPre(state.roomId, sid));
+  for (const k of keys) await sDel(k);
+
+  const stories = state.meta.stories.filter(x => x.id !== sid);
+  const patch = { stories };
+  if (state.meta.currentStoryId === sid) {
+    const next = stories.find(x => x.status !== 'done') || stories[0] || null;
+    patch.currentStoryId = next ? next.id : null;
+    patch.phase = 'voting';
+    if (next && next.status !== 'done') next.status = 'active';
+    override.dev = null; override.tester = null;
+    state.myVote = undefined;
+  }
+  await saveMeta(patch);
+  toast('Story dihapus');
+}
+
+async function doVote(value) {
+  const st = currentStory();
+  if (!st || state.meta.phase !== 'voting') return;
+  const rd = st.round || 1;
+  const ok = await sSet(kVote(state.roomId, st.id, rd, state.me.id), {
+    participantId: state.me.id, name: state.me.name, role: state.me.role,
+    storyId: st.id, round: rd, value, votedAt: now(),
   });
+  if (!ok) { toast('Gagal simpan vote: ' + (lastStorageError || 'cek Console')); return; }
+  state.myVote = value;
   state.votedIds.add(state.me.id);
-  state.myVoteVal = value;
-  toast('Vote tersimpan');
+  toast('Vote tersimpan: ' + value);
   render();
 }
 
 async function reveal() {
-  Object.keys(state.revealCache).forEach(k => { if (k.startsWith(state.meta.currentStoryId + '::')) delete state.revealCache[k]; });
+  if (!state.votedIds.size) { toast('Belum ada yang vote'); return; }
+  override.dev = null; override.tester = null;   // biar pakai hasil hitung, bukan nilai nyangkut
   await saveMeta({ phase: 'revealed' });
 }
 
+/* FIX (bug 4): reset = naikkan ronde. Key vote jadi baru, jadi tidak mungkin
+   ada klien yang masih memegang nilai ronde lama. Vote lama dihapus juga. */
 async function resetVotes() {
-  const sid = state.meta.currentStoryId;
-  const vKeys = await sList(kVotePrefix(state.roomId, sid));
-  for (const k of vKeys) await sDel(k);
-  Object.keys(state.revealCache).forEach(k => { if (k.startsWith(sid + '::')) delete state.revealCache[k]; });
-  state.votedIds = new Set(); state.votes = {};
-  state.myVoteVal = undefined;
-  await saveMeta({ phase: 'voting' });
-  toast('Vote di-reset');
+  const st = currentStory();
+  if (!st) return;
+  const rd = st.round || 1;
+  const keys = await sList(kVotePre(state.roomId, st.id, rd));
+  for (const k of keys) await sDel(k);
+
+  const stories = state.meta.stories.map(s => s.id === st.id ? { ...s, round: rd + 1 } : s);
+  override.dev = null; override.tester = null;
+  state.myVote = undefined;
+  state.votedIds = new Set();
+  state.votes = {};
+  await saveMeta({ stories, phase: 'voting' });
+  toast('Vote di-reset — ronde ' + (rd + 1));
 }
 
-async function acceptStory(devPoint, testerPoint) {
-  const sid = state.meta.currentStoryId;
-  const final = (devPoint || 0) + (testerPoint || 0);
-  const idx = state.meta.stories.findIndex(s => s.id === sid);
-  const stories = state.meta.stories.map(s => s.id === sid
-    ? { ...s, status: 'done', devPoint, testerPoint, finalPoint: final } : s);
-  // next pending story
+/* FITUR 6: kunci → story point tersimpan permanen di meta (dev, tester, final). */
+async function acceptStory() {
+  const st = currentStory();
+  if (!st) return;
+  const r = roleResults();
+  const devP = r.dev.final;
+  const testP = r.qa.final;
+  const final = devP + testP;
+
+  const stories = state.meta.stories.map(s => s.id === st.id
+    ? { ...s, status: 'done', devPoint: devP, testerPoint: testP, finalPoint: final, decidedAt: now() }
+    : s);
+
+  const idx = stories.findIndex(s => s.id === st.id);
   let next = null;
   for (let i = 1; i <= stories.length; i++) {
-    const s = stories[(idx + i) % stories.length];
-    if (s.status === 'pending') { next = s.id; break; }
+    const c = stories[(idx + i) % stories.length];
+    if (c.status === 'pending') { next = c; break; }
   }
-  if (next) stories.forEach(s => { if (s.id === next) s.status = 'active'; });
-  await saveMeta({ stories, currentStoryId: next, phase: 'voting' });
-  toast(`Story di-lock: ${final} point`);
+  if (next) next.status = 'active';
+
+  override.dev = null; override.tester = null;
+  state.myVote = undefined;
+  await saveMeta({ stories, currentStoryId: next ? next.id : null, phase: 'voting' });
+  toast('Tersimpan: ' + st.title + ' = ' + final + ' point');
 }
 
-/* master override steppers */
-const override = { dev: null, tester: null };
-const numericFib = FIB.filter(v => typeof v === 'number');
+/* ---------- perhitungan per role ---------- */
+function peopleByRole(role) {
+  return Object.values(state.people)
+    .filter(p => p.role === role)
+    .sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0) || a.id.localeCompare(b.id));
+}
+/* Kartu yang ditampilkan: peserta online, plus siapa pun yang sudah vote. */
+function stackPeople(role) {
+  return peopleByRole(role).filter(p => !isOffline(p) || state.votedIds.has(p.id));
+}
+
+function roleResults() {
+  const mk = (role, ov) => {
+    const list = stackPeople(role);
+    const vals = list.filter(p => state.votedIds.has(p.id))
+                     .map(p => state.votes[p.id])
+                     .filter(v => v !== undefined);
+    const m = computeMode(vals);
+    const computed = m.value == null ? 0 : m.value;
+    return { list, vals, mode: m, computed, final: ov == null ? computed : ov, edited: ov != null };
+  };
+  return { dev: mk('developer', override.dev), qa: mk('tester', override.tester) };
+}
+
 function stepOverride(which, dir) {
-  const cur = override[which] ?? 0;
-  let i = numericFib.indexOf(cur);
+  const r = roleResults();
+  const cur = which === 'dev' ? r.dev.final : r.qa.final;
+  let i = NUM_FIB.indexOf(cur);
   if (i === -1) i = 0;
-  i = Math.max(0, Math.min(numericFib.length - 1, i + dir));
-  override[which] = numericFib[i];
+  i = Math.max(0, Math.min(NUM_FIB.length - 1, i + dir));
+  override[which === 'dev' ? 'dev' : 'tester'] = NUM_FIB[i];
   render();
 }
+</script>
 
-/* ============================================================
+<script>
+/* ================================================================
    RENDER
-   ============================================================ */
-function currentStory() {
-  return state.meta ? state.meta.stories.find(s => s.id === state.meta.currentStoryId) : null;
-}
-function voters(role) {
-  return Object.values(state.people).filter(p => p.role === role);
-}
-
-function render() {
-  renderTable();
-  renderStories();
-  renderPeople();
-}
+   ================================================================ */
+function render() { renderTable(); renderStories(); renderPeople(); }
 
 function renderTable() {
   const el = document.getElementById('tableEl');
-  const meta = state.meta;
-  const story = currentStory();
+  const st = currentStory();
 
-  if (!story) {
-    el.innerHTML = `<div class="table-empty">
-      <div class="big">Belum ada story aktif</div>
-      <div>${state.isMaster ? 'Tambahkan story di panel kanan untuk mulai voting.' : 'Menunggu Room Master menambahkan story…'}</div>
-    </div>`;
+  if (!st) {
+    el.innerHTML = '<div class="table-empty">' +
+      '<div class="big">Belum ada story aktif</div>' +
+      '<div>' + (state.isMaster ? 'Tambahkan story di panel Story untuk mulai voting.' : 'Menunggu Room Master menambahkan story…') + '</div>' +
+      '</div>';
     return;
   }
 
-  const revealed = meta.phase === 'revealed';
-  let html = `<div class="story-head">
-      <div class="eyebrow">${revealed ? 'Kartu terbuka' : 'Sedang voting'}</div>
-      <h2>${esc(story.title)}</h2>
-      ${story.desc ? `<div class="desc">${esc(story.desc)}</div>` : ''}
-    </div>`;
+  const revealed = state.meta.phase === 'revealed';
+  const done = st.status === 'done';
+  const rd = st.round || 1;
 
-  // played cards, per role
-  html += `<div class="played">
-    ${renderStack('developer', 'Developer', revealed)}
-    ${renderStack('tester', 'Tester / QA', revealed)}
-  </div>`;
+  let h = '<div class="story-head">' +
+    '<div class="eyebrow">' + (done ? 'Sudah dikunci' : revealed ? 'Kartu terbuka' : 'Sedang voting') +
+      (rd > 1 ? ' · ronde ' + rd : '') + '</div>' +
+    '<h2>' + esc(st.title) + '</h2>' +
+    (st.desc ? '<div class="desc">' + esc(st.desc) + '</div>' : '') +
+    '</div>';
 
-  // results (revealed) or hand (voter)
-  if (revealed) {
-    html += renderResults();
+  h += '<div class="played">' + renderStack('developer', revealed) + renderStack('tester', revealed) + '</div>';
+
+  if (done) {
+    h += '<div class="result"><div class="res-grid">' +
+      '<div class="res-block"><div class="res-lbl">Developer</div><div class="res-num">' + (st.devPoint || 0) + '</div></div>' +
+      '<div class="res-op">+</div>' +
+      '<div class="res-block"><div class="res-lbl">Tester / QA</div><div class="res-num">' + (st.testerPoint || 0) + '</div></div>' +
+      '<div class="res-final"><div class="res-lbl">Story point</div><div class="res-num">' + (st.finalPoint || 0) + '</div></div>' +
+      '</div></div>';
+  } else if (revealed) {
+    h += renderResults();
   } else if (!state.isMaster) {
-    html += renderHand(meta.fib);
+    h += renderHand();
+  } else {
+    h += '<div class="locked">Menunggu peserta memilih kartu…</div>';
   }
 
-  // controls
-  html += renderControls(revealed);
-
-  el.innerHTML = html;
+  h += renderControls(revealed, done);
+  el.innerHTML = h;
   bindTable();
 }
 
-function renderStack(role, label, revealed) {
-  const list = voters(role);
-  const cls = role === 'developer' ? 'dev' : 'tester';
-  let cards = '';
-  if (list.length === 0) {
-    cards = `<span class="waiting">Belum ada ${label}.</span>`;
+function renderStack(role, revealed) {
+  const isDev = role === 'developer';
+  const cls = isDev ? 'dev' : 'qa';
+  const label = isDev ? 'Developer' : 'Tester / QA';
+  const list = stackPeople(role);
+  const votedN = list.filter(p => state.votedIds.has(p.id)).length;
+
+  let cards;
+  if (!list.length) {
+    cards = '<span class="waiting">Belum ada ' + label + ' di room.</span>';
   } else {
     cards = list.map(p => {
       const voted = state.votedIds.has(p.id);
       const val = state.votes[p.id];
-      const up = revealed && voted;
-      const shown = val === undefined ? '·' : (val === '☕' ? '☕' : val);
-      return `<div class="pcard ${up ? 'up' : ''}">
-        <div class="inner">
-          <div class="face back"></div>
-          <div class="face front ${cls}">${esc(String(shown))}</div>
-        </div>
-        <span class="name">${esc(p.name)}${voted && !revealed ? ' ✓' : ''}</span>
-      </div>`;
+      const up = revealed && voted && val !== undefined;
+      const shown = val === undefined ? '' : String(val);
+      return '<div class="pcard ' + (up ? 'up' : '') + '">' +
+        '<div class="inner">' +
+          '<div class="face back ' + (voted && !revealed ? 'done' : '') + '"></div>' +
+          '<div class="face front ' + cls + '">' + esc(shown) + '</div>' +
+        '</div>' +
+        '<span class="nm">' + esc(p.name) + '</span>' +
+      '</div>';
     }).join('');
   }
-  return `<div class="stack">
-    <h3><span class="role-tag ${cls}">${label}</span> <span style="color:#bfe4df;font-weight:500">${list.filter(p=>state.votedIds.has(p.id)).length}/${list.length} vote</span></h3>
-    <div class="cards-row">${cards}</div>
-  </div>`;
+
+  return '<div class="stack">' +
+    '<h3><span class="role-tag ' + cls + '">' + label + '</span>' +
+    '<span class="vcount">' + votedN + '/' + list.length + ' vote</span></h3>' +
+    '<div class="cards-row">' + cards + '</div>' +
+  '</div>';
 }
 
-function renderHand(fib) {
-  const myVote = state.votedIds.has(state.me.id);
-  let cards = fib.map(v => {
+function renderHand() {
+  const voted = state.votedIds.has(state.me.id);
+  const cards = FIB.map(v => {
     const small = (v === '?' || v === '☕');
-    const label = v === '☕' ? '☕' : v;
-    return `<button class="vcard ${small ? 'small' : ''}" data-vote="${v}">${esc(String(label))}</button>`;
+    const sel = state.myVote !== undefined && String(state.myVote) === String(v);
+    return '<button class="vcard ' + (small ? 'small' : '') + (sel ? ' sel' : '') + '" data-vote="' + esc(String(v)) + '">' + esc(String(v)) + '</button>';
   }).join('');
-  return `<div class="hand-wrap">
-    <div class="ht">${myVote ? 'Kartu kamu sudah dimainkan — boleh diganti' : 'Pilih kartumu'}</div>
-    <div class="hand">${cards}</div>
-  </div>`;
+  return '<div class="hand-wrap">' +
+    '<div class="ht">' + (voted ? 'Kartu kamu sudah dimainkan — boleh diganti' : 'Pilih kartumu') + '</div>' +
+    '<div class="hand">' + cards + '</div>' +
+  '</div>';
 }
 
+/* FITUR 3: tampilkan nilai + sebaran vote tiap role di layar Master (dan peserta). */
 function renderResults() {
-  const devVotes = voters('developer').filter(p => state.votedIds.has(p.id)).map(p => state.votes[p.id]).filter(v => v !== undefined);
-  const testVotes = voters('tester').filter(p => state.votedIds.has(p.id)).map(p => state.votes[p.id]).filter(v => v !== undefined);
-  const devM = computeMode(devVotes);
-  const testM = computeMode(testVotes);
+  const r = roleResults();
 
-  if (override.dev === null) override.dev = devM.value ?? 0;
-  if (override.tester === null) override.tester = testM.value ?? 0;
+  const block = (key, lbl, res) => {
+    /* sebaran: 5×2 artinya angka 5 dipilih 2 orang. Yang jadi modus disorot. */
+    const dist = Object.keys(res.mode.freq || {}).map(Number).sort((a, b) => a - b)
+      .map(v => '<span class="chip' + (res.mode.winners.includes(v) ? ' win' : '') + '">' + v + '×' + res.mode.freq[v] + '</span>').join('');
+    const nonNum = ['?', '☕'].filter(k => res.vals.includes(k))
+      .map(k => '<span class="chip">' + k + '</span>').join('');
+    const val = state.isMaster
+      ? '<div class="stepper"><button data-step="' + key + '" data-dir="-1">−</button>' +
+        '<span class="val">' + res.final + '</span>' +
+        '<button data-step="' + key + '" data-dir="1">+</button></div>'
+      : '<div class="res-num">' + res.final + '</div>';
+    return '<div class="res-block">' +
+      '<div class="res-lbl">' + lbl + '</div>' + val +
+      '<div class="dist">' + (dist || '<span class="chip">belum ada</span>') + nonNum + '</div>' +
+    '</div>';
+  };
 
-  const devP = state.isMaster ? override.dev : (devM.value ?? 0);
-  const testP = state.isMaster ? override.tester : (testM.value ?? 0);
-  const final = (devP || 0) + (testP || 0);
+  const notes = [];
+  if (r.dev.mode.tie || r.qa.mode.tie)
+    notes.push('<div class="note">⚖︎ Ada suara seri — default dipakai nilai tertinggi di antara yang seri. Diskusikan, lalu sesuaikan dengan tombol −/+.</div>');
+  if (r.dev.edited || r.qa.edited)
+    notes.push('<div class="note edited">✎ Nilai disesuaikan manual oleh Room Master.</div>');
 
-  const stepper = (which, val) => state.isMaster
-    ? `<div class="stepper">
-         <button data-step="${which}" data-dir="-1">−</button>
-         <span class="val">${val}</span>
-         <button data-step="${which}" data-dir="1">+</button>
-       </div>`
-    : `<div class="res-num">${val}</div>`;
-
-  const tieNote = (devM.tie || testM.tie)
-    ? `<div class="tie-note">⚖︎ Ada suara seri — nilai lebih tinggi dipakai sebagai default. Master bisa sesuaikan.</div>` : '';
-
-  return `<div class="result-bar">
-    <div class="res-block">
-      <div class="lbl">Developer</div>
-      ${stepper('dev', devP)}
-    </div>
-    <div class="res-op">+</div>
-    <div class="res-block">
-      <div class="lbl">Tester / QA</div>
-      ${stepper('tester', testP)}
-    </div>
-    <div class="res-final">
-      <div class="lbl">Story point</div>
-      <div class="res-num">${final}</div>
-    </div>
-    ${tieNote}
-  </div>`;
+  return '<div class="result">' +
+    '<div class="res-grid">' +
+      block('dev', 'Developer', r.dev) +
+      '<div class="res-op">+</div>' +
+      block('tester', 'Tester / QA', r.qa) +
+      '<div class="res-final"><div class="res-lbl">Story point</div>' +
+        '<div class="res-num">' + (r.dev.final + r.qa.final) + '</div></div>' +
+    '</div>' + notes.join('') +
+  '</div>';
 }
 
-function renderControls(revealed) {
+function renderControls(revealed, done) {
   if (!state.isMaster) return '';
-  const votedCount = state.votedIds.size;
-  if (!revealed) {
-    return `<div class="controls">
-      <button class="btn btn-gold" id="revealBtn" ${votedCount === 0 ? 'disabled' : ''}>Buka kartu (${votedCount})</button>
-      <button class="btn btn-ghost" id="resetBtn2" ${votedCount === 0 ? 'disabled' : ''}>Reset vote</button>
-    </div>`;
+  const n = state.votedIds.size;
+  if (done) {
+    return '<div class="controls">' +
+      '<button class="btn btn-ghost" id="reopenBtn">Buka lagi &amp; vote ulang</button>' +
+    '</div>';
   }
-  return `<div class="controls">
-    <button class="btn btn-gold" id="acceptBtn">Kunci &amp; lanjut</button>
-    <button class="btn btn-ghost" id="resetBtn">Vote ulang</button>
-  </div>`;
+  if (!revealed) {
+    return '<div class="controls">' +
+      '<button class="btn btn-orange" id="revealBtn"' + (n ? '' : ' disabled') + '>Buka kartu (' + n + ')</button>' +
+      '<button class="btn btn-ghost" id="resetBtn"' + (n ? '' : ' disabled') + '>Reset vote</button>' +
+    '</div>';
+  }
+  return '<div class="controls">' +
+    '<button class="btn btn-orange" id="acceptBtn">Kunci &amp; lanjut</button>' +
+    '<button class="btn btn-ghost" id="resetBtn">Vote ulang</button>' +
+  '</div>';
 }
 
 function bindTable() {
-  document.querySelectorAll('[data-vote]').forEach(b =>
-    b.addEventListener('click', () => {
-      let v = b.dataset.vote;
-      if (v !== '?' && v !== '☕') v = Number(v);
-      castVote(v);
-    }));
-  const rb = document.getElementById('revealBtn'); if (rb) rb.addEventListener('click', reveal);
-  const rs2 = document.getElementById('resetBtn2'); if (rs2) rs2.addEventListener('click', resetVotes);
-  const rs = document.getElementById('resetBtn'); if (rs) rs.addEventListener('click', () => { override.dev = null; override.tester = null; resetVotes(); });
-  const ab = document.getElementById('acceptBtn'); if (ab) ab.addEventListener('click', () => {
-    const d = override.dev || 0, t = override.tester || 0;
-    override.dev = null; override.tester = null;
-    acceptStory(d, t);
+  document.querySelectorAll('[data-vote]').forEach(b => b.addEventListener('click', () => {
+    let v = b.dataset.vote;
+    if (v !== '?' && v !== '☕') v = Number(v);
+    doVote(v);
+  }));
+  const on = (id, fn) => { const e = document.getElementById(id); if (e) e.addEventListener('click', fn); };
+  on('revealBtn', reveal);
+  on('resetBtn', resetVotes);
+  on('acceptBtn', acceptStory);
+  on('reopenBtn', async () => {
+    const st = currentStory();
+    const stories = state.meta.stories.map(s => s.id === st.id ? { ...s, status: 'active' } : s);
+    await saveMeta({ stories, phase: 'voting' });
+    await resetVotes();
   });
   document.querySelectorAll('[data-step]').forEach(b =>
     b.addEventListener('click', () => stepOverride(b.dataset.step, Number(b.dataset.dir))));
-
-  // highlight my selected card from local cache (no storage read)
-  if (!state.isMaster && state.meta.phase === 'voting' && state.myVoteVal !== undefined) {
-    document.querySelectorAll('[data-vote]').forEach(b => {
-      let bv = b.dataset.vote;
-      if (bv !== '?' && bv !== '☕') bv = Number(bv);
-      b.classList.toggle('sel', bv === state.myVoteVal);
-    });
-  }
 }
 
 function renderStories() {
   const list = document.getElementById('storyList');
-  const meta = state.meta;
-  document.getElementById('storyCount').textContent = meta.stories.length ? `${meta.stories.filter(s=>s.status==='done').length}/${meta.stories.length} selesai` : '';
+  const stories = state.meta.stories;
+  const doneN = stories.filter(s => s.status === 'done').length;
+  document.getElementById('storyCount').textContent = stories.length ? doneN + '/' + stories.length + ' selesai' : '';
 
-  if (!meta.stories.length) {
-    list.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:6px 2px">Belum ada story.</div>`;
+  if (!stories.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:6px 2px">Belum ada story.</div>';
   } else {
-    list.innerHTML = meta.stories.map(s => {
-      const active = s.id === meta.currentStoryId;
-      const canClick = state.isMaster && !active;
-      return `<div class="story-item ${active ? 'active' : ''} ${canClick ? 'clickable' : ''}" ${canClick ? `data-goto="${s.id}"` : ''}>
-        <span class="si-status ${s.status}"></span>
-        <span class="si-title ${s.status === 'done' ? 'done' : ''}">${esc(s.title)}</span>
-        ${s.finalPoint != null ? `<span class="si-point">${s.finalPoint}</span>` : ''}
-      </div>`;
+    list.innerHTML = stories.map(s => {
+      const active = s.id === state.meta.currentStoryId;
+
+      if (state.editingStoryId === s.id) {
+        return '<div class="story-item active"><div class="edit-row">' +
+          '<input id="editInput" type="text" maxlength="90" value="' + esc(s.title) + '" />' +
+          '<button class="icon-btn" data-savetitle="' + s.id + '" title="Simpan">✓</button>' +
+          '<button class="icon-btn" data-canceledit="1" title="Batal">✕</button>' +
+        '</div></div>';
+      }
+
+      const sub = s.status === 'done'
+        ? '<div class="si-sub">Dev ' + (s.devPoint || 0) + ' + QA ' + (s.testerPoint || 0) + '</div>' : '';
+      const acts = state.isMaster
+        ? '<div class="si-acts">' +
+            '<button class="icon-btn" data-edit="' + s.id + '" title="Ubah judul">✎</button>' +
+            '<button class="icon-btn danger" data-del="' + s.id + '" title="Hapus story">🗑</button>' +
+          '</div>' : '';
+
+      return '<div class="story-item ' + (active ? 'active' : '') + '">' +
+        '<span class="si-status ' + s.status + '"></span>' +
+        '<div class="si-main">' +
+          '<div class="si-title ' + (s.status === 'done' ? 'done' : '') + (state.isMaster && !active ? ' clickable' : '') + '"' +
+            (state.isMaster && !active ? ' data-goto="' + s.id + '"' : '') + '>' + esc(s.title) + '</div>' + sub +
+        '</div>' +
+        (s.finalPoint != null ? '<span class="si-point">' + s.finalPoint + '</span>' : '') + acts +
+      '</div>';
     }).join('');
-    if (state.isMaster) {
-      list.querySelectorAll('[data-goto]').forEach(el =>
-        el.addEventListener('click', () => { override.dev = null; override.tester = null; setActiveStory(el.dataset.goto); }));
-    }
+
+    list.querySelectorAll('[data-goto]').forEach(e => e.addEventListener('click', () => setActiveStory(e.dataset.goto)));
+    list.querySelectorAll('[data-edit]').forEach(e => e.addEventListener('click', () => {
+      state.editingStoryId = e.dataset.edit; renderStories();
+      const i = document.getElementById('editInput'); if (i) { i.focus(); i.select(); }
+    }));
+    list.querySelectorAll('[data-del]').forEach(e => e.addEventListener('click', () => deleteStory(e.dataset.del)));
+    list.querySelectorAll('[data-savetitle]').forEach(e => e.addEventListener('click', () => {
+      const i = document.getElementById('editInput');
+      renameStory(e.dataset.savetitle, i ? i.value : '');
+    }));
+    list.querySelectorAll('[data-canceledit]').forEach(e => e.addEventListener('click', () => { state.editingStoryId = null; renderStories(); }));
+    const ei = document.getElementById('editInput');
+    if (ei) ei.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') renameStory(state.editingStoryId, ei.value);
+      if (ev.key === 'Escape') { state.editingStoryId = null; renderStories(); }
+    });
   }
 
-  const total = meta.stories.reduce((a, s) => a + (s.finalPoint || 0), 0);
-  document.getElementById('totalPoint').textContent = total;
+  document.getElementById('totalPoint').textContent = stories.reduce((a, s) => a + (s.finalPoint || 0), 0);
 }
 
 function renderPeople() {
-  const people = Object.values(state.people).sort((a, b) => {
-    const order = { master: 0, developer: 1, tester: 2 };
-    return (order[a.role] - order[b.role]) || (a.joinedAt - b.joinedAt);
-  });
+  const order = { master: 0, developer: 1, tester: 2 };
+  const people = Object.values(state.people)
+    .sort((a, b) => (order[a.role] - order[b.role]) || (a.joinedAt || 0) - (b.joinedAt || 0));
   document.getElementById('pCount').textContent = people.length;
+
   const revealed = state.meta.phase === 'revealed';
-  const hasStory = !!state.meta.currentStoryId;
+  const hasStory = !!currentStory();
 
   document.getElementById('peopleList').innerHTML = people.map(p => {
-    const offline = now() - (p.lastSeen || 0) > OFFLINE_MS;
-    const isMe = p.id === state.me.id;
-    let state_html = '';
-    if (p.role !== 'master' && hasStory) {
-      if (offline) state_html = `<span class="pstate off">offline</span>`;
-      else if (state.votedIds.has(p.id)) state_html = `<span class="pstate voted">${revealed ? 'terbuka' : 'sudah vote'}</span>`;
-      else state_html = `<span class="pstate thinking">mikir…</span>`;
-    } else if (offline) {
-      state_html = `<span class="pstate off">offline</span>`;
+    const off = isOffline(p);
+    const me = p.id === state.me.id;
+    let badge = '';
+    if (off) badge = '<span class="pstate off">offline</span>';
+    else if (p.role !== 'master' && hasStory) {
+      badge = state.votedIds.has(p.id)
+        ? '<span class="pstate voted">' + (revealed ? 'terbuka' : 'sudah vote') + '</span>'
+        : '<span class="pstate thinking">mikir…</span>';
     }
-    const roleLabel = p.role === 'master' ? 'Master' : (p.role === 'developer' ? 'Dev' : 'QA');
-    return `<div class="prow">
-      <span class="pav ${p.role}">${esc(initials(p.name))}</span>
-      <span class="pname">${esc(p.name)} ${isMe ? '<span class="you">(kamu)</span>' : ''}<br><span style="font-size:11px;color:var(--muted)">${roleLabel}</span></span>
-      ${state_html}
-    </div>`;
-  }).join('');
-}
+    const kick = (state.isMaster && !me)
+      ? '<button class="icon-btn danger kick" data-kick="' + p.id + '" title="Keluarkan">✕</button>' : '';
+    const role = p.role === 'master' ? 'Room Master' : p.role === 'developer' ? 'Developer' : 'Tester / QA';
 
-/* enter-to-submit on landing */
-[nameInput, document.getElementById('roomNameInput')].forEach(inp =>
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && state.mode === 'create') createRoom(); }));
-document.getElementById('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+    return '<div class="prow">' +
+      '<span class="pav ' + p.role + '">' + esc(initials(p.name)) + '</span>' +
+      '<div class="pinfo">' +
+        '<div class="pname">' + esc(p.name) + (me ? ' <span class="you">(kamu)</span>' : '') + '</div>' +
+        '<div class="prole">' + role + '</div>' +
+      '</div>' + badge + kick +
+    '</div>';
+  }).join('');
+
+  document.querySelectorAll('[data-kick]').forEach(e =>
+    e.addEventListener('click', () => kickParticipant(e.dataset.kick)));
+}
 </script>
