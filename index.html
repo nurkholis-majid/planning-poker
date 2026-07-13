@@ -268,6 +268,40 @@
   .pstate.off { background: #f4f5f7; color: #a8b0bd; }
   .kick { opacity: 0; transition: opacity .12s; }
 
+  /* ---- modal ---- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;
+    background: rgba(14,15,59,.55); backdrop-filter: blur(2px); padding: 20px;
+  }
+  .modal {
+    width: 100%; max-width: 430px; background: var(--surface); border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(14,15,59,.35); padding: 24px;
+  }
+  .modal h4 { font-family: var(--disp); font-size: 18px; margin: 0 0 10px; }
+  .modal p { font-size: 14px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
+  .modal .summary {
+    background: var(--blue-soft); border-radius: 10px; padding: 11px 13px;
+    font-size: 13.5px; color: var(--ink); margin-bottom: 12px;
+  }
+  .modal .warn {
+    background: #fdf2f2; border-left: 3px solid #d9534f; border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: #8a3a37; margin-bottom: 14px;
+  }
+  .modal .check {
+    display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px;
+    border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer;
+    font-size: 13.5px; color: var(--ink); margin-bottom: 16px; transition: .12s;
+  }
+  .modal .check:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .modal .check input { margin: 2px 0 0; width: 16px; height: 16px; accent-color: var(--blue); flex: none; }
+  .modal .check .sub { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .modal-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .modal-acts button { padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: .12s; }
+  .btn-cancel { color: var(--muted); border: 1.5px solid var(--line); background: var(--white); }
+  .btn-cancel:hover { background: #f4f6f9; color: var(--ink); }
+  .btn-danger { background: #d9534f; color: var(--white); }
+  .btn-danger:hover { background: #c33f3b; }
+
   .toast {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
     background: var(--navy); color: var(--white); padding: 11px 18px; border-radius: 11px; font-size: 14px;
@@ -328,13 +362,13 @@
       <div class="pip">8</div>
       <div>
         <h1>Planning Poker</h1>
-        <p>Estimasi story point bareng, tanpa saling lihat.</p>
+        <p>Estimasi story point kolaboratif untuk sprint planning &amp; grooming.</p>
       </div>
     </div>
 
     <div class="field">
-      <label for="nameInput">Nama kamu</label>
-      <input id="nameInput" type="text" placeholder="cth. Majid" maxlength="24" autocomplete="off" />
+      <label for="nameInput">Nama</label>
+      <input id="nameInput" type="text" placeholder="Nama lengkap" maxlength="24" autocomplete="off" />
     </div>
 
     <div class="tabs">
@@ -347,26 +381,26 @@
         <label for="roomNameInput">Nama room / sprint</label>
         <input id="roomNameInput" type="text" placeholder="cth. Grooming Sprint 66" maxlength="40" autocomplete="off" />
       </div>
-      <p class="hint">Kamu jadi <strong>Room Master</strong> — atur story &amp; buka kartu. Master tidak ikut ngevote.</p>
-      <button class="primary" id="createBtn">Buat room &amp; mulai</button>
+      <p class="hint">Anda berperan sebagai <strong>Room Master</strong>: mengelola story, membuka kartu, dan mengunci hasil. Room Master tidak memberikan estimasi.</p>
+      <button class="primary" id="createBtn">Buat room</button>
     </div>
 
     <div id="joinPane" class="hidden">
       <div class="field">
         <label for="codeInput">Kode room</label>
-        <input id="codeInput" type="text" placeholder="cth. K7QP2" maxlength="6" autocomplete="off"
+        <input id="codeInput" type="text" placeholder="5 karakter" maxlength="6" autocomplete="off"
                style="text-transform:uppercase;letter-spacing:.18em;font-weight:600" />
       </div>
       <div class="field">
-        <label>Peran kamu</label>
+        <label>Peran</label>
         <div class="roles">
           <button class="role-opt" data-role="developer">
             <div class="rt">Developer</div>
-            <div class="rd">Effort ngoding</div>
+            <div class="rd">Estimasi effort pengembangan</div>
           </button>
           <button class="role-opt" data-role="tester">
             <div class="rt">Tester / QA</div>
-            <div class="rd">Effort testing</div>
+            <div class="rd">Estimasi effort pengujian</div>
           </button>
         </div>
       </div>
@@ -399,13 +433,13 @@
         <h3>Story
           <span style="display:flex;align-items:center;gap:6px">
             <span class="count" id="storyCount"></span>
-            <button class="icon-btn" id="exportBtn" title="Ekspor hasil">⤓</button>
+            <button class="icon-btn" id="exportBtn" title="Ekspor hasil estimasi">⤓</button>
           </span>
         </h3>
         <div id="exportMenu" class="export-menu hidden">
-          <button data-exp="copy">📋 Salin ringkasan</button>
-          <button data-exp="csv">📄 Unduh CSV</button>
-          <button data-exp="md">📝 Salin tabel Markdown</button>
+          <button data-exp="copy">Salin ringkasan</button>
+          <button data-exp="csv">Unduh berkas CSV</button>
+          <button data-exp="md">Salin tabel Markdown</button>
         </div>
         <div id="addStoryWrap" class="add-story hidden">
           <input id="stTitle" type="text" placeholder="Judul story" maxlength="90" />
@@ -426,6 +460,27 @@
     </div>
   </div>
 </section>
+
+<!-- Modal konfirmasi penutupan room. Menggantikan dialog bawaan browser,
+     dan memberi PILIHAN unduh (bukan memaksa). -->
+<div class="modal-backdrop hidden" id="closeModal">
+  <div class="modal">
+    <h4>Tutup room</h4>
+    <div class="summary" id="closeSummary"></div>
+    <div class="warn">Seluruh data room akan dihapus permanen dari database dan tidak dapat dipulihkan.</div>
+    <label class="check">
+      <input type="checkbox" id="dlCheck" checked />
+      <span>
+        Unduh hasil estimasi (CSV) sebelum room ditutup
+        <span class="sub">Nonaktifkan jika hasil sudah diekspor atau tidak diperlukan.</span>
+      </span>
+    </label>
+    <div class="modal-acts">
+      <button class="btn-cancel" id="closeCancel">Batal</button>
+      <button class="btn-danger" id="closeConfirm">Tutup room</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -674,8 +729,8 @@ document.querySelectorAll('.role-opt').forEach(btn => {
 async function createRoom() {
   const name = nameInput.value.trim();
   const roomName = document.getElementById('roomNameInput').value.trim();
-  if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
-  if (!roomName) return (landErr.textContent = 'Kasih nama room / sprint-nya.');
+  if (!name) return (landErr.textContent = 'Nama wajib diisi.');
+  if (!roomName) return (landErr.textContent = 'Nama room wajib diisi.');
   if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap.');
 
   const rid = roomCode();
@@ -685,7 +740,7 @@ async function createRoom() {
     currentStoryId: null, phase: 'voting', stories: [], updatedAt: now(),
   };
   if (!(await sSet(kMeta(rid), meta)))
-    return (landErr.textContent = 'Gagal membuat room: ' + (lastStorageError || 'cek Console.'));
+    return (landErr.textContent = 'Gagal membuat room: ' + (lastStorageError || 'periksa Console.'));
   await sSet(kPart(rid, me.id), { ...me, joinedAt: now(), lastSeen: now() });
   enterRoom(rid, me, true, meta);
 }
@@ -693,17 +748,17 @@ async function createRoom() {
 async function joinRoom() {
   const name = nameInput.value.trim();
   const code = document.getElementById('codeInput').value.trim().toUpperCase();
-  if (!name) return (landErr.textContent = 'Isi nama kamu dulu ya.');
-  if (!code) return (landErr.textContent = 'Masukkan kode room.');
-  if (!state.joinRole) return (landErr.textContent = 'Pilih peran kamu (Developer / Tester).');
+  if (!name) return (landErr.textContent = 'Nama wajib diisi.');
+  if (!code) return (landErr.textContent = 'Kode room wajib diisi.');
+  if (!state.joinRole) return (landErr.textContent = 'Pilih peran Anda terlebih dahulu.');
   if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap.');
 
   const meta = await sGet(kMeta(code));
-  if (!meta) return (landErr.textContent = 'Room tidak ditemukan. Cek lagi kodenya.');
+  if (!meta) return (landErr.textContent = 'Room tidak ditemukan. Periksa kembali kode room.');
 
   const me = { id: uid(), name, role: state.joinRole };
   if (!(await sSet(kPart(code, me.id), { ...me, joinedAt: now(), lastSeen: now() })))
-    return (landErr.textContent = 'Gagal gabung: ' + (lastStorageError || 'cek Console.'));
+    return (landErr.textContent = 'Gagal bergabung: ' + (lastStorageError || 'periksa Console.'));
   enterRoom(code, me, false, meta);
 }
 
@@ -761,7 +816,7 @@ async function restoreSession() {
   /* Master ditentukan dari DB, bukan dari flag lokal → tahan refresh. */
   const isMaster = meta.masterId === me.id;
   enterRoom(sess.roomId, me, isMaster, meta);
-  toast('Masuk lagi sebagai ' + me.name);
+  toast('Sesi dipulihkan — masuk sebagai ' + me.name);
   return true;
 }
 
@@ -770,8 +825,8 @@ async function restoreSession() {
 async function leaveRoom() {
   const others = Object.values(state.people).filter(p => p.id !== state.me.id).length;
   const msg = state.isMaster && others
-    ? 'Kamu Room Master. Kalau keluar, tidak ada yang bisa buka kartu / kunci story. Tetap keluar?'
-    : 'Keluar dari room? Kamu bisa gabung lagi dengan peran berbeda.';
+    ? 'Anda adalah Room Master. Jika keluar, tidak ada peserta yang dapat membuka kartu atau mengunci story.\n\nTetap keluar dari room?'
+    : 'Keluar dari room?\n\nAnda dapat bergabung kembali, termasuk dengan peran yang berbeda.';
   if (!confirm(msg)) return;
 
   clearInterval(state.timer);
@@ -783,50 +838,72 @@ async function leaveRoom() {
 }
 document.getElementById('leaveBtn').addEventListener('click', leaveRoom);
 
-/* HOUSEKEEPING: Master menutup room → semua key room ini dihapus dari DB
-   (meta + peserta + seluruh vote). Ini jalur pembersihan utama; cron di SQL
-   hanya jaring pengaman untuk room yang ditinggal tanpa ditutup. */
-async function closeRoom() {
-  const total = state.meta.stories.reduce((a, s) => a + (s.finalPoint || 0), 0);
-  const doneN = state.meta.stories.filter(s => s.status === 'done').length;
-  if (!confirm(
-    'Tutup room "' + state.meta.roomName + '"?\n\n' +
-    doneN + ' story selesai · total ' + total + ' point.\n' +
-    'Semua data room dihapus permanen dari database.\n' +
-    'Hasilnya akan otomatis diunduh sebagai CSV sebelum dihapus.'
-  )) return;
+/* HOUSEKEEPING: Master menutup room → seluruh key room dihapus dari DB
+   (meta + peserta + seluruh estimasi). Ini jalur pembersihan utama; cron di SQL
+   hanya jaring pengaman untuk room yang ditinggal tanpa ditutup.
 
-  /* Data akan hilang permanen → unduh CSV dulu, otomatis. */
-  if (state.meta.stories.length) {
+   Unduhan CSV bersifat OPSIONAL — peserta memilih lewat checkbox, tidak dipaksa. */
+function openCloseModal() {
+  const stories = state.meta.stories;
+  const doneN = stories.filter(s => s.status === 'done').length;
+  const total = stories.reduce((a, s) => a + (s.finalPoint || 0), 0);
+  const hasData = stories.length > 0;
+
+  document.getElementById('closeSummary').innerHTML =
+    '<strong>' + esc(state.meta.roomName) + '</strong><br>' +
+    doneN + ' dari ' + stories.length + ' story selesai diestimasi · total ' + total + ' point';
+
+  const chk = document.getElementById('dlCheck');
+  chk.checked = hasData;      // tidak ada story → tidak ada yang bisa diunduh
+  chk.disabled = !hasData;
+
+  document.getElementById('closeModal').classList.remove('hidden');
+}
+
+async function doCloseRoom() {
+  const wantDownload = document.getElementById('dlCheck').checked && state.meta.stories.length > 0;
+  document.getElementById('closeModal').classList.add('hidden');
+
+  if (wantDownload) {
     downloadCsv();
-    toast('Hasil diunduh sebagai CSV');
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 600));   // beri jeda agar unduhan terpicu
   }
 
   clearInterval(state.timer);
   const keys = await sList('pp:room:' + state.roomId + ':');
-  if (keys === undefined) { toast('Gagal menutup room: ' + (lastStorageError || 'cek koneksi')); return; }
+  if (keys === undefined) {
+    toast('Gagal menutup room: ' + (lastStorageError || 'periksa koneksi'));
+    state.timer = setInterval(tick, POLL_MS);    // lanjutkan sync, room tidak jadi ditutup
+    return;
+  }
   for (const k of keys) await sDel(k);
   clearSession();
-  alert('Room ditutup. ' + keys.length + ' baris dihapus dari database.');
-  location.reload();
+  toast('Room ditutup — ' + keys.length + ' baris dihapus');
+  setTimeout(() => location.reload(), 1200);
 }
-document.getElementById('closeBtn').addEventListener('click', closeRoom);
+
+document.getElementById('closeBtn').addEventListener('click', openCloseModal);
+document.getElementById('closeConfirm').addEventListener('click', doCloseRoom);
+document.getElementById('closeCancel').addEventListener('click', () =>
+  document.getElementById('closeModal').classList.add('hidden'));
+document.getElementById('closeModal').addEventListener('click', (e) => {
+  if (e.target.id === 'closeModal') document.getElementById('closeModal').classList.add('hidden');
+});
 
 /* Master boleh menendang peserta nyangkut (mis. yang salah pilih role lalu tutup tab). */
 async function kickParticipant(pid) {
   const p = state.people[pid];
-  if (!p || !confirm('Keluarkan ' + p.name + ' dari room?')) return;
+  if (!p || !confirm('Keluarkan ' + p.name + ' dari room ini?')) return;
   const st = currentStory();
   if (st) await sDel(kVote(state.roomId, st.id, st.round || 1, pid));
   await sDel(kPart(state.roomId, pid));
   delete state.people[pid];
-  toast(p.name + ' dikeluarkan');
+  toast(p.name + ' dikeluarkan dari room');
   await syncAll(); render();
 }
 
 document.getElementById('copyCode').addEventListener('click', () => {
-  const done = () => toast('Kode room disalin');
+  const done = () => toast('Kode room disalin ke clipboard');
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(state.roomId).then(done).catch(done);
   else done();
 });
@@ -840,7 +917,7 @@ async function tick() {
   if (state.roomClosed) {
     clearInterval(state.timer);
     clearSession();
-    alert('Room ini sudah ditutup oleh Room Master. Datanya telah dihapus.');
+    alert('Room ini telah ditutup oleh Room Master. Seluruh datanya sudah dihapus.');
     location.reload();
     return;
   }
@@ -940,7 +1017,7 @@ function currentStory() {
 async function saveMeta(patch) {
   state.meta = { ...state.meta, ...patch, updatedAt: now() };
   const ok = await sSet(kMeta(state.roomId), state.meta);
-  if (!ok) toast('Gagal menyimpan: ' + (lastStorageError || 'cek Console'));
+  if (!ok) toast('Gagal menyimpan: ' + (lastStorageError || 'periksa Console'));
   render();
   return ok;
 }
@@ -949,7 +1026,7 @@ async function addStory() {
   const t = document.getElementById('stTitle');
   const d = document.getElementById('stDesc');
   const title = t.value.trim();
-  if (!title) { toast('Judul story belum diisi'); t.focus(); return; }
+  if (!title) { toast('Judul story wajib diisi'); t.focus(); return; }
 
   const story = {
     id: uid(), title, desc: d.value.trim(), status: 'pending', round: 1,
@@ -980,7 +1057,7 @@ async function setActiveStory(sid) {
 /* FITUR 7: Master bisa rename & hapus story. */
 async function renameStory(sid, title) {
   const t = title.trim();
-  if (!t) { toast('Judul tidak boleh kosong'); return; }
+  if (!t) { toast('Judul story tidak boleh kosong'); return; }
   const stories = state.meta.stories.map(s => s.id === sid ? { ...s, title: t } : s);
   state.editingStoryId = null;
   await saveMeta({ stories });
@@ -990,7 +1067,7 @@ async function renameStory(sid, title) {
 async function deleteStory(sid) {
   const s = state.meta.stories.find(x => x.id === sid);
   if (!s) return;
-  if (!confirm('Hapus story "' + s.title + '"? Semua vote-nya ikut terhapus.')) return;
+  if (!confirm('Hapus story "' + s.title + '"?\n\nSeluruh estimasi pada story ini akan ikut terhapus.')) return;
 
   /* bersihkan semua vote story ini (semua ronde) */
   const keys = await sList(kStoryPre(state.roomId, sid));
@@ -1018,15 +1095,15 @@ async function doVote(value) {
     participantId: state.me.id, name: state.me.name, role: state.me.role,
     storyId: st.id, round: rd, value, votedAt: now(),
   });
-  if (!ok) { toast('Gagal simpan vote: ' + (lastStorageError || 'cek Console')); return; }
+  if (!ok) { toast('Gagal menyimpan estimasi: ' + (lastStorageError || 'periksa Console')); return; }
   state.myVote = value;
   state.votedIds.add(state.me.id);
-  toast('Vote tersimpan: ' + value);
+  toast('Estimasi tersimpan: ' + value);
   render();
 }
 
 async function reveal() {
-  if (!state.votedIds.size) { toast('Belum ada yang vote'); return; }
+  if (!state.votedIds.size) { toast('Belum ada estimasi yang masuk'); return; }
   override.dev = null; override.tester = null;   // biar pakai hasil hitung, bukan nilai nyangkut
   await saveMeta({ phase: 'revealed' });
 }
@@ -1046,7 +1123,7 @@ async function resetVotes() {
   state.votedIds = new Set();
   state.votes = {};
   await saveMeta({ stories, phase: 'voting' });
-  toast('Vote di-reset — ronde ' + (rd + 1));
+  toast('Estimasi direset — ronde ' + (rd + 1));
 }
 
 /* FITUR 6: kunci → story point tersimpan permanen di meta (dev, tester, final). */
@@ -1057,12 +1134,12 @@ async function acceptStory() {
   /* PENGAMAN (turunan bug sList): jangan pernah mengunci angka kalau data
      di layar belum tentu lengkap, atau kalau tidak ada satu pun vote angka. */
   if (!state.syncOk) {
-    toast('Koneksi bermasalah — angka di layar mungkin belum lengkap. Tunggu sync pulih.');
+    toast('Sinkronisasi bermasalah. Data mungkin belum lengkap — tunggu koneksi pulih.');
     return;
   }
   const rr = roleResults();
   if (rr.dev.mode.n === 0 && rr.qa.mode.n === 0) {
-    if (!confirm('Belum ada vote angka (semua "?" atau belum ada yang vote).\nTetap kunci story ini sebagai 0 point?')) return;
+    if (!confirm('Belum ada estimasi angka yang masuk (seluruhnya "?" atau kosong).\n\nKunci story ini dengan nilai 0 point?')) return;
   }
 
   const r = roleResults();
@@ -1085,7 +1162,7 @@ async function acceptStory() {
   override.dev = null; override.tester = null;
   state.myVote = undefined;
   await saveMeta({ stories, currentStoryId: next ? next.id : null, phase: 'voting' });
-  toast('Tersimpan: ' + st.title + ' = ' + final + ' point');
+  toast('Story dikunci: ' + st.title + ' — ' + final + ' point');
 }
 
 /* ---------- perhitungan per role ---------- */
@@ -1154,16 +1231,16 @@ function exportTotals() {
 function exportAsText() {
   const t = exportTotals();
   const lines = [
-    state.meta.roomName + ' — Hasil Planning Poker',
+    state.meta.roomName + ' — Hasil Estimasi Planning Poker',
     new Date().toLocaleString('id-ID'),
     '',
   ];
   t.rows.forEach(r => {
     lines.push(r.status === 'Selesai'
-      ? r.no + '. ' + r.title + ' → ' + r.total + ' point (Dev ' + r.dev + ' + QA ' + r.qa + ')'
-      : r.no + '. ' + r.title + ' → belum diestimasi');
+      ? r.no + '. ' + r.title + ' — ' + r.total + ' point (Dev ' + r.dev + ' + QA ' + r.qa + ')'
+      : r.no + '. ' + r.title + ' — belum diestimasi');
   });
-  lines.push('', 'Total: ' + t.total + ' point (Dev ' + t.dev + ' + QA ' + t.qa + ') dari ' + t.done.length + '/' + t.rows.length + ' story');
+  lines.push('', 'Total: ' + t.total + ' point (Dev ' + t.dev + ' + QA ' + t.qa + ') — ' + t.done.length + ' dari ' + t.rows.length + ' story selesai diestimasi');
   return lines.join('\n');
 }
 function exportAsMarkdown() {
@@ -1194,14 +1271,14 @@ function downloadCsv() {
 async function copyText(txt, label) {
   try {
     await navigator.clipboard.writeText(txt);
-    toast(label + ' disalin');
+    toast(label + ' disalin ke clipboard');
   } catch (e) {
     /* clipboard butuh HTTPS + izin; fallback ke textarea lama */
     const ta = document.createElement('textarea');
     ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
     document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast(label + ' disalin'); }
-    catch (_) { toast('Gagal menyalin — cek Console'); console.log(txt); }
+    try { document.execCommand('copy'); toast(label + ' disalin ke clipboard'); }
+    catch (_) { toast('Gagal menyalin — lihat Console'); console.log(txt); }
     ta.remove();
   }
 }
@@ -1210,9 +1287,9 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   document.getElementById('exportMenu').classList.toggle('hidden');
 });
 document.querySelectorAll('[data-exp]').forEach(b => b.addEventListener('click', () => {
-  if (!state.meta.stories.length) { toast('Belum ada story untuk diekspor'); return; }
+  if (!state.meta.stories.length) { toast('Belum ada story yang dapat diekspor'); return; }
   const k = b.dataset.exp;
-  if (k === 'csv') { downloadCsv(); toast('CSV diunduh'); }
+  if (k === 'csv') { downloadCsv(); toast('Berkas CSV diunduh'); }
   else if (k === 'copy') copyText(exportAsText(), 'Ringkasan');
   else if (k === 'md') copyText(exportAsMarkdown(), 'Tabel Markdown');
   document.getElementById('exportMenu').classList.add('hidden');
@@ -1231,7 +1308,7 @@ function renderSync() {
   if (!d || !t) return;
   d.classList.toggle('bad', !state.syncOk);
   const base = state.me.name + ' · ' + (state.isMaster ? 'Room Master' : state.me.role === 'developer' ? 'Developer' : 'Tester / QA');
-  t.textContent = state.syncOk ? base : base + ' · koneksi bermasalah';
+  t.textContent = state.syncOk ? base : base + ' · sinkronisasi bermasalah';
 }
 
 function renderTable() {
@@ -1242,7 +1319,7 @@ function renderTable() {
     el.innerHTML = '<div class="table-empty">' +
       '<div class="deck"><i></i><i></i><i></i></div>' +
       '<div class="big">Belum ada story aktif</div>' +
-      '<div>' + (state.isMaster ? 'Tambahkan story di panel Story untuk mulai voting.' : 'Menunggu Room Master menambahkan story…') + '</div>' +
+      '<div>' + (state.isMaster ? 'Tambahkan story pada panel Story untuk memulai sesi estimasi.' : 'Menunggu Room Master menambahkan story…') + '</div>' +
       '</div>';
     return;
   }
@@ -1252,7 +1329,7 @@ function renderTable() {
   const rd = st.round || 1;
 
   let h = '<div class="story-head">' +
-    '<div class="eyebrow">' + (done ? 'Sudah dikunci' : revealed ? 'Kartu terbuka' : 'Sedang voting') +
+    '<div class="eyebrow">' + (done ? 'Terkunci' : revealed ? 'Kartu terbuka' : 'Estimasi berlangsung') +
       (rd > 1 ? ' · ronde ' + rd : '') + '</div>' +
     '<h2>' + esc(st.title) + '</h2>' +
     (st.desc ? '<div class="desc">' + esc(st.desc) + '</div>' : '') +
@@ -1272,7 +1349,7 @@ function renderTable() {
   } else if (!state.isMaster) {
     h += renderHand();
   } else {
-    h += '<div class="locked">Menunggu peserta memilih kartu…</div>';
+    h += '<div class="locked">Menunggu estimasi dari peserta…</div>';
   }
 
   h += renderControls(revealed, done);
@@ -1289,7 +1366,7 @@ function renderStack(role, revealed) {
 
   let cards;
   if (!list.length) {
-    cards = '<span class="waiting">Belum ada ' + label + ' di room.</span>';
+    cards = '<span class="waiting">Belum ada ' + label + ' dalam room ini.</span>';
   } else {
     cards = list.map(p => {
       const voted = state.votedIds.has(p.id);
@@ -1308,7 +1385,7 @@ function renderStack(role, revealed) {
 
   return '<div class="stack">' +
     '<h3><span class="role-tag ' + cls + '">' + label + '</span>' +
-    '<span class="vcount">' + votedN + '/' + list.length + ' vote</span></h3>' +
+    '<span class="vcount">' + votedN + '/' + list.length + ' estimasi</span></h3>' +
     '<div class="cards-row">' + cards + '</div>' +
   '</div>';
 }
@@ -1321,7 +1398,7 @@ function renderHand() {
     return '<button class="vcard ' + (small ? 'small' : '') + (sel ? ' sel' : '') + '" data-vote="' + esc(String(v)) + '">' + esc(String(v)) + '</button>';
   }).join('');
   return '<div class="hand-wrap">' +
-    '<div class="ht">' + (voted ? 'Kartu kamu sudah dimainkan — boleh diganti' : 'Pilih kartumu') + '</div>' +
+    '<div class="ht">' + (voted ? 'Estimasi Anda tersimpan — masih dapat diubah' : 'Pilih estimasi Anda') + '</div>' +
     '<div class="hand">' + cards + '</div>' +
   '</div>';
 }
@@ -1349,9 +1426,9 @@ function renderResults() {
 
   const notes = [];
   if (r.dev.mode.tie || r.qa.mode.tie)
-    notes.push('<div class="note">⚖︎ Ada suara seri — default dipakai nilai tertinggi di antara yang seri. Diskusikan, lalu sesuaikan dengan tombol −/+.</div>');
+    notes.push('<div class="note">⚖︎ Terdapat suara seri. Nilai tertinggi di antara yang seri dipakai sebagai nilai awal — diskusikan, lalu sesuaikan melalui tombol −/+.</div>');
   if (r.dev.edited || r.qa.edited)
-    notes.push('<div class="note edited">✎ Nilai disesuaikan manual oleh Room Master.</div>');
+    notes.push('<div class="note edited">✎ Nilai telah disesuaikan secara manual oleh Room Master.</div>');
 
   return '<div class="result">' +
     '<div class="res-grid">' +
@@ -1369,18 +1446,18 @@ function renderControls(revealed, done) {
   const n = state.votedIds.size;
   if (done) {
     return '<div class="controls">' +
-      '<button class="btn btn-ghost" id="reopenBtn">Buka lagi &amp; vote ulang</button>' +
+      '<button class="btn btn-ghost" id="reopenBtn">Buka kembali untuk estimasi ulang</button>' +
     '</div>';
   }
   if (!revealed) {
     return '<div class="controls">' +
       '<button class="btn btn-orange" id="revealBtn"' + (n ? '' : ' disabled') + '>Buka kartu (' + n + ')</button>' +
-      '<button class="btn btn-ghost" id="resetBtn"' + (n ? '' : ' disabled') + '>Reset vote</button>' +
+      '<button class="btn btn-ghost" id="resetBtn"' + (n ? '' : ' disabled') + '>Reset estimasi</button>' +
     '</div>';
   }
   return '<div class="controls">' +
     '<button class="btn btn-orange" id="acceptBtn">Kunci &amp; lanjut</button>' +
-    '<button class="btn btn-ghost" id="resetBtn">Vote ulang</button>' +
+    '<button class="btn btn-ghost" id="resetBtn">Estimasi ulang</button>' +
   '</div>';
 }
 
@@ -1428,7 +1505,7 @@ function renderStories() {
         ? '<div class="si-sub">Dev ' + (s.devPoint || 0) + ' + QA ' + (s.testerPoint || 0) + '</div>' : '';
       const acts = state.isMaster
         ? '<div class="si-acts">' +
-            '<button class="icon-btn" data-edit="' + s.id + '" title="Ubah judul">✎</button>' +
+            '<button class="icon-btn" data-edit="' + s.id + '" title="Ubah judul story">✎</button>' +
             '<button class="icon-btn danger" data-del="' + s.id + '" title="Hapus story">🗑</button>' +
           '</div>' : '';
 
@@ -1479,17 +1556,17 @@ function renderPeople() {
     if (off) badge = '<span class="pstate off">offline</span>';
     else if (p.role !== 'master' && hasStory) {
       badge = state.votedIds.has(p.id)
-        ? '<span class="pstate voted">' + (revealed ? 'terbuka' : 'sudah vote') + '</span>'
-        : '<span class="pstate thinking">mikir…</span>';
+        ? '<span class="pstate voted">' + (revealed ? 'Terbuka' : 'Selesai') + '</span>'
+        : '<span class="pstate thinking">Menunggu</span>';
     }
     const kick = (state.isMaster && !me)
-      ? '<button class="icon-btn danger kick" data-kick="' + p.id + '" title="Keluarkan">✕</button>' : '';
+      ? '<button class="icon-btn danger kick" data-kick="' + p.id + '" title="Keluarkan dari room">✕</button>' : '';
     const role = p.role === 'master' ? 'Room Master' : p.role === 'developer' ? 'Developer' : 'Tester / QA';
 
     return '<div class="prow">' +
       '<span class="pav ' + p.role + '">' + esc(initials(p.name)) + '</span>' +
       '<div class="pinfo">' +
-        '<div class="pname">' + esc(p.name) + (me ? ' <span class="you">(kamu)</span>' : '') + '</div>' +
+        '<div class="pname">' + esc(p.name) + (me ? ' <span class="you">(Anda)</span>' : '') + '</div>' +
         '<div class="prole">' + role + '</div>' +
       '</div>' + badge + kick +
     '</div>';
