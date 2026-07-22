@@ -368,7 +368,7 @@
 
     <div class="field">
       <label for="nameInput">Nama</label>
-      <input id="nameInput" type="text" placeholder="Nama lengkap" maxlength="24" autocomplete="off" />
+      <input id="nameInput" type="text" placeholder="Nama" maxlength="24" autocomplete="off" />
     </div>
 
     <div class="tabs">
@@ -381,7 +381,7 @@
         <label for="roomNameInput">Nama room / sprint</label>
         <input id="roomNameInput" type="text" placeholder="cth. Grooming Sprint 66" maxlength="40" autocomplete="off" />
       </div>
-      <p class="hint">Anda berperan sebagai <strong>Room Master</strong>: mengelola story, membuka kartu, dan mengunci hasil. Room Master tidak memberikan estimasi.</p>
+      <p class="hint">Kamu berperan sebagai <strong>Room Master</strong>: mengelola story, membuka kartu, dan mengunci hasil. Room Master tidak memberikan estimasi.</p>
       <button class="primary" id="createBtn">Buat room</button>
     </div>
 
@@ -392,15 +392,15 @@
                style="text-transform:uppercase;letter-spacing:.18em;font-weight:600" />
       </div>
       <div class="field">
-        <label>Peran</label>
+        <label>Role</label>
         <div class="roles">
           <button class="role-opt" data-role="developer">
             <div class="rt">Developer</div>
-            <div class="rd">Estimasi effort pengembangan</div>
+            <div class="rd">Estimasi effort development</div>
           </button>
           <button class="role-opt" data-role="tester">
             <div class="rt">Tester / QA</div>
-            <div class="rd">Estimasi effort pengujian</div>
+            <div class="rd">Estimasi effort testing</div>
           </button>
         </div>
       </div>
@@ -438,7 +438,7 @@
         </h3>
         <div id="exportMenu" class="export-menu hidden">
           <button data-exp="copy">Salin ringkasan</button>
-          <button data-exp="csv">Unduh berkas CSV</button>
+          <button data-exp="csv">Unduh file CSV</button>
           <button data-exp="md">Salin tabel Markdown</button>
         </div>
         <div id="addStoryWrap" class="add-story hidden">
@@ -788,7 +788,7 @@ async function joinRoom() {
   const code = document.getElementById('codeInput').value.trim().toUpperCase();
   if (!name) return (landErr.textContent = 'Nama wajib diisi.');
   if (!code) return (landErr.textContent = 'Kode room wajib diisi.');
-  if (!state.joinRole) return (landErr.textContent = 'Pilih peran Anda terlebih dahulu.');
+  if (!state.joinRole) return (landErr.textContent = 'Pilih role Kamu terlebih dahulu.');
   if (!storageReady()) return (landErr.textContent = configError || 'Backend belum siap.');
 
   const meta = await sGet(kMeta(code));
@@ -863,8 +863,8 @@ async function restoreSession() {
 async function leaveRoom() {
   const others = Object.values(state.people).filter(p => p.id !== state.me.id).length;
   const msg = state.isMaster && others
-    ? 'Anda adalah Room Master. Jika keluar, tidak ada peserta yang dapat membuka kartu atau mengunci story.\n\nTetap keluar dari room?'
-    : 'Keluar dari room?\n\nAnda dapat bergabung kembali, termasuk dengan peran yang berbeda.';
+    ? 'Kamu adalah Room Master. Jika keluar, tidak ada peserta yang dapat membuka kartu atau mengunci story.\n\nTetap keluar dari room?'
+    : 'Keluar dari room?\n\nKamu dapat bergabung kembali, termasuk dengan role yang berbeda.';
   if (!confirm(msg)) return;
 
   clearInterval(state.timer);
@@ -1441,7 +1441,7 @@ function renderHand() {
     return '<button class="vcard ' + (small ? 'small' : '') + (sel ? ' sel' : '') + '" data-vote="' + esc(String(v)) + '">' + esc(String(v)) + '</button>';
   }).join('');
   return '<div class="hand-wrap">' +
-    '<div class="ht">' + (voted ? 'Estimasi Anda tersimpan — masih dapat diubah' : 'Pilih estimasi Anda') + '</div>' +
+    '<div class="ht">' + (voted ? 'Estimasi Kamu tersimpan — masih dapat diubah' : 'Pilih estimasi Kamu') + '</div>' +
     '<div class="hand">' + cards + '</div>' +
   '</div>';
 }
@@ -1600,7 +1600,7 @@ function renderPeople() {
     else if (p.role !== 'master' && hasStory) {
       badge = state.votedIds.has(p.id)
         ? '<span class="pstate voted">' + (revealed ? 'Terbuka' : 'Selesai') + '</span>'
-        : '<span class="pstate thinking">Menunggu</span>';
+        : '<span class="pstate thinking">Memilih</span>';
     }
     const kick = (state.isMaster && !me)
       ? '<button class="icon-btn danger kick" data-kick="' + p.id + '" title="Keluarkan dari room">✕</button>' : '';
@@ -1609,7 +1609,7 @@ function renderPeople() {
     return '<div class="prow">' +
       '<span class="pav ' + p.role + '">' + esc(initials(p.name)) + '</span>' +
       '<div class="pinfo">' +
-        '<div class="pname">' + esc(p.name) + (me ? ' <span class="you">(Anda)</span>' : '') + '</div>' +
+        '<div class="pname">' + esc(p.name) + (me ? ' <span class="you">(Kamu)</span>' : '') + '</div>' +
         '<div class="prole">' + role + '</div>' +
       '</div>' + badge + kick +
     '</div>';
