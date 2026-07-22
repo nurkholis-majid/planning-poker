@@ -551,6 +551,7 @@ const state = {
   lastHeartbeat: 0,
   timer: null,
   syncOk: true,        // false = sync terakhir gagal → data di layar mungkin basi
+  _syncing: false,     // kunci: cegah syncAll bertumpuk saat query lambat (20+ user)
   roomClosed: false,
 };
 
@@ -610,6 +611,43 @@ async function sDel(key) {
     if (claudeStore) { await claudeStore.delete(key, true); return; }
     await sb.from('pp_kv').delete().eq('key', key);
   } catch (e) {}
+}
+
+/* STABILITAS (20+ user): ambil banyak key sekaligus dalam SATU query,
+   bukan N query berurutan. Ini yang bikin angka reveal jadi stabil —
+   sebelumnya tiap peserta di-fetch satu per satu tiap poll.
+   Opsi:
+     values      : true = ambil nilai; false = ambil key saja (untuk
+                   fase voting, supaya vote orang lain TIDAK bocor ke Network).
+     excludePref : lewati key yang berawalan ini (mis. pisahkan vote dari meta+peserta).
+   Return: array {key, value?} | undefined saat gagal (bukan [] — penting
+   agar kegagalan tidak terbaca sebagai "kosong"). */
+async function sScan(prefix, { values = true, excludePref = null } = {}) {
+  try {
+    if (claudeStore) {
+      // preview Claude tidak punya query batch → emulasi dgn list + get
+      const keys = await sList(prefix);
+      if (keys === undefined) return undefined;
+      const out = [];
+      for (const k of keys) {
+        if (excludePref && k.startsWith(excludePref)) continue;
+        if (!values) { out.push({ key: k }); continue; }
+        const v = await sGet(k);
+        if (v === undefined) return undefined;
+        if (v !== null) out.push({ key: k, value: v });
+      }
+      return out;
+    }
+    let q = sb.from('pp_kv').select(values ? 'key,value' : 'key').like('key', prefix + '%');
+    if (excludePref) q = q.not('key', 'like', excludePref + '%');
+    const { data, error } = await q;
+    if (error) { lastStorageError = error.message; console.error('[PP] sScan gagal', prefix, error); return undefined; }
+    return data.map(r => values ? { key: r.key, value: r.value } : { key: r.key });
+  } catch (e) {
+    lastStorageError = e.message || String(e);
+    console.error('[PP] sScan exception', prefix, e);
+    return undefined;
+  }
 }
 
 /* ---------- key builders ----------
@@ -936,71 +974,76 @@ async function heartbeat() {
 }
 
 async function syncAll() {
-  const meta = await sGet(kMeta(state.roomId));
+  /* Kunci anti-tumpang-tindih. setInterval tidak menunggu Promise selesai,
+     jadi kalau satu poll lambat, poll berikutnya bisa jalan barengan dan
+     saling menimpa state → angka kedip. Ini yang mencegahnya. */
+  if (state._syncing) return;
+  state._syncing = true;
+  try {
+    const roomPre = 'pp:room:' + state.roomId + ':';
 
-  /* GAGAL sync → pertahankan apa yang sudah ada di layar, jangan dikosongkan. */
-  if (meta === undefined) { state.syncOk = false; return; }
+    /* QUERY 1: meta + seluruh peserta dalam SATU query (vote dikecualikan).
+       Konstan 1 query berapa pun jumlah user. */
+    const base = await sScan(roomPre, { values: true, excludePref: roomPre + 'v:' });
+    if (base === undefined) { state.syncOk = false; return; }   // gagal → pertahankan layar
 
-  /* meta hilang = room ditutup Master → data sudah dihapus dari DB. */
-  if (meta === null) { state.roomClosed = true; state.syncOk = false; return; }
+    let meta = null;
+    const people = {};
+    for (const { key, value } of base) {
+      const rest = key.slice(roomPre.length);
+      if (rest === 'meta') meta = value;
+      else if (rest.startsWith('p:')) people[rest.slice(2)] = value;
+    }
 
-  state.syncOk = true;
-  if (meta) {
+    /* meta hilang = room ditutup Master → data sudah dihapus dari DB. */
+    if (meta === null) { state.roomClosed = true; state.syncOk = false; return; }
+
     const storyChanged = !state.meta || meta.currentStoryId !== state.meta.currentStoryId;
-    const st = meta.stories.find(s => s.id === meta.currentStoryId);
+    const stNew = meta.stories.find(s => s.id === meta.currentStoryId);
     const prevSt = state.meta && state.meta.stories.find(s => s.id === state.meta.currentStoryId);
-    const roundChanged = st && prevSt && st.id === prevSt.id && (st.round || 1) !== (prevSt.round || 1);
+    const roundChanged = stNew && prevSt && stNew.id === prevSt.id && (stNew.round || 1) !== (prevSt.round || 1);
+
     state.meta = meta;
-    /* Ganti story ATAU ronde baru → buang jejak ronde lama. */
+    state.people = people;   // swap atomik: render tak pernah lihat daftar setengah jadi
+    state.syncOk = true;
     if (storyChanged || roundChanged) {
       state.myVote = undefined;
       override.dev = null; override.tester = null;
     }
-  }
 
-  /* peserta */
-  const pKeys = await sList(kPartPre(state.roomId));
-  if (pKeys === undefined) { state.syncOk = false; return; }   // jangan hapus daftar peserta karena error
-  const ids = pKeys.map(k => k.split(':').pop());
-  const refreshAll = state.pollTick % 3 === 0;
-  for (const id of ids) {
-    if (refreshAll || !state.people[id]) {
-      const p = await sGet(kPart(state.roomId, id));
-      if (p) state.people[id] = p;
+    /* QUERY 2: vote untuk story+ronde aktif — juga 1 query. */
+    const st = currentStory();
+    if (!st) { state.votedIds = new Set(); state.votes = {}; return; }
+    const rd = st.round || 1;
+    const votePre = roomPre + 'v:' + st.id + ':' + rd + ':';
+    const revealed = state.meta.phase === 'revealed';
+
+    /* Saat voting: values=false → hanya ambil KEY (siapa yang sudah vote).
+       Nilai tidak dikirim sama sekali, jadi tak bisa diintip lewat Network. */
+    const rows = await sScan(votePre, { values: revealed });
+    if (rows === undefined) { state.syncOk = false; return; }
+
+    const newVoted = new Set();
+    const newVotes = {};
+    for (const row of rows) {
+      const pid = row.key.slice(votePre.length);
+      if (!people[pid]) continue;   // abaikan vote orang yang sudah keluar
+      newVoted.add(pid);
+      if (revealed && row.value && row.value.value !== undefined) newVotes[pid] = row.value.value;
     }
-  }
-  Object.keys(state.people).forEach(id => { if (!ids.includes(id)) delete state.people[id]; });
+    /* swap atomik di akhir — nilai reveal tampil sekaligus, tidak sepotong-sepotong */
+    state.votedIds = newVoted;
+    state.votes = newVotes;
 
-  /* vote story aktif */
-  state.votedIds = new Set();
-  state.votes = {};
-  const st = currentStory();
-  if (!st) return;
-  const rd = st.round || 1;
-
-  const vKeys = await sList(kVotePre(state.roomId, st.id, rd));
-  if (vKeys === undefined) { state.syncOk = false; return; }   // <- inti bug: dulu [] → "0 vote"
-
-  const voterIds = vKeys.map(k => k.split(':').pop())
-                        .filter(pid => state.people[pid]);   // abaikan vote orang yang sudah keluar
-  voterIds.forEach(pid => state.votedIds.add(pid));
-
-  if (state.meta.phase === 'revealed') {
-    /* Ambil nilai segar dari server (tanpa cache — cache lama dulu bikin
-       peserta lihat angka ronde sebelumnya). Kalau ADA SATU SAJA yang gagal
-       diambil, tandai sync tidak sehat supaya Master tidak bisa mengunci
-       angka yang belum lengkap. */
-    for (const pid of voterIds) {
-      const v = await sGet(kVote(state.roomId, st.id, rd, pid));
-      if (v === undefined) { state.syncOk = false; continue; }
-      if (v && v.value !== undefined) state.votes[pid] = v.value;
+    if (revealed) {
+      if (newVotes[state.me.id] !== undefined) state.myVote = newVotes[state.me.id];
+    } else if (newVoted.has(state.me.id) && state.myVote === undefined) {
+      /* highlight kartu sendiri: cukup ambil vote SENDIRI (1 get, aman). */
+      const mine = await sGet(roomPre + 'v:' + st.id + ':' + rd + ':' + state.me.id);
+      if (mine && mine.value !== undefined) state.myVote = mine.value;
     }
-    if (state.votes[state.me.id] !== undefined) state.myVote = state.votes[state.me.id];
-  } else if (state.votedIds.has(state.me.id) && state.myVote === undefined) {
-    /* Saat voting, nilai orang lain TIDAK diambil (biar tidak bisa diintip lewat
-       Network tab). Yang diambil cuma vote sendiri — untuk highlight kartu. */
-    const mine = await sGet(kVote(state.roomId, st.id, rd, state.me.id));
-    if (mine) state.myVote = mine.value;
+  } finally {
+    state._syncing = false;
   }
 }
 </script>
